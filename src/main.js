@@ -1,6 +1,7 @@
 import './style.css'
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -30,7 +31,38 @@ const lightHelper = new THREE.PointLightHelper(pointLight);
 const gridHelper = new THREE.GridHelper(200, 50);
 scene.add(lightHelper, gridHelper);
 
-const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new PointerLockControls( camera, document.body );
+scene.add(controls.getObject());
+
+document.body.addEventListener('click', () => {
+  controls.lock();
+});
+
+const keysPressed = {};
+
+window.addEventListener('keydown', (event) => {
+  keysPressed[event.key.toLowerCase()] = true;
+})
+
+window.addEventListener('keyup', (event) => {
+  keysPressed[event.key.toLowerCase()] = false;
+})
+
+function handlePlayerMovement(delta) {
+  const speed = 10;
+
+  const direction = new THREE.Vector3();
+
+  if (keysPressed['w']) direction.z -= 1;
+  if (keysPressed['s']) direction.z += 1;
+  if (keysPressed['a']) direction.x -= 1;
+  if (keysPressed['d']) direction.x += 1;
+
+  direction.normalize();
+  direction.applyEuler(camera.rotation); // Move in direction camera is facing
+
+  controls.getObject().position.addScaledVector(direction, speed * delta);
+}
 
 function rotateTorus() {
   torus.rotation.x += 0.01;
@@ -52,9 +84,14 @@ for (let i = 0; i < 200; i++) {
   addStar();
 }
 
+let previousTime = performance.now();
 function animate() {
   requestAnimationFrame(animate);
   rotateTorus();
+  const currentTime = performance.now();
+  const delta = (currentTime - previousTime) / 1000;
+  previousTime = currentTime;
+  handlePlayerMovement(delta);
   controls.update();
   renderer.render(scene, camera);
 }
