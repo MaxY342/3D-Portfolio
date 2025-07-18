@@ -24,17 +24,32 @@ renderer.render(scene, camera);
 
 // Intro Group
 const introGroup = new THREE.Group();
-const portalData = createPortal(10, 0, 0, -20);
+const portalData = createPortal(10, 0x00ff00, new THREE.Vector3(0, 0, -20));
 const introPortal = portalData.torus;
-const torusBox = portalData.torusBox;
-const introPortalText = createText('Enter', 2, introPortal.position, 0x00ff00);
+const introTorusBox = portalData.torusBox;
+const introPortalText = await createText('Enter', 2, introPortal.position, 0x00ff00);
 introGroup.add(introPortal);
-introGroup.add(torusBox);
+introGroup.add(introTorusBox);
 introGroup.add(introPortalText);
 scene.add(introGroup);
 
 // Menu Group
 const menuGroup = new THREE.Group();
+const aboutMePortalData = createPortal(10, 0xff0000, new THREE.Vector3(-30, 0, -20));
+const aboutMePortal = aboutMePortalData.torus;
+const aboutMePortalBox = aboutMePortalData.torusBox;
+const aboutMePortalText = await createText('About Me', 2, aboutMePortal.position, 0xff0000);
+const projectsPortalData = createPortal(10, 0x00ff00, new THREE.Vector3(0, 0, -40));
+const projectsPortal = projectsPortalData.torus;
+const projectsPortalBox = projectsPortalData.torusBox;
+const projectsPortalText = await createText('Projects', 2, projectsPortal.position, 0x00ff00);
+const contactPortalData = createPortal(10, 0x0000ff, new THREE.Vector3(30, 0, -30));
+const contactPortal = contactPortalData.torus;
+const contactPortalBox = contactPortalData.torusBox;
+const contactPortalText = await createText('Contact', 2, contactPortal.position, 0x0000ff);
+menuGroup.add(aboutMePortal, aboutMePortalText, aboutMePortalBox);
+menuGroup.add(projectsPortal, projectsPortalText, projectsPortalBox);
+menuGroup.add(contactPortal, contactPortalText, contactPortalBox);
 scene.add(menuGroup);
 menuGroup.visible = false;
 
@@ -50,11 +65,11 @@ function switchState(newState) {
 }
 
 // Portal
-function createPortal(radius, x, y, z) {
+function createPortal(radius, color, position) {
   const geometry = new THREE.TorusGeometry(radius, 3, 16, 100);
-  const material = new THREE.MeshStandardMaterial({ color: 0x00FF00 });
+  const material = new THREE.MeshStandardMaterial({ color: color });
   const torus = new THREE.Mesh(geometry, material);
-  torus.position.set(x, y, z);
+  torus.position.copy(position);
   const torusBox = new THREE.Box3().setFromObject(torus);
 
   return { torus, torusBox };
@@ -62,19 +77,24 @@ function createPortal(radius, x, y, z) {
 
 // Enter Text
 function createText(text, fontSize, position, color) {
-  const fontLoader = new FontLoader();
-  fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (font) => {
-    const textGeometry = new TextGeometry(text, {
-      font: font,
-      size: fontSize,
-      height: 0.5,
-      depth: 0.1,
-    });
-    const textMaterial = new THREE.MeshStandardMaterial({ color: color });
-    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-    textMesh.position.copy(position);
-    textGeometry.center();
-    return textMesh;
+  return new Promise((resolve, reject) => {
+    const fontLoader = new FontLoader();
+    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (font) => {
+      const textGeometry = new TextGeometry(text, {
+        font: font,
+        size: fontSize,
+        height: 0.5,
+        depth: 0.1,
+      });
+      const textMaterial = new THREE.MeshStandardMaterial({ color: color });
+      const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+      textMesh.position.copy(position);
+      textGeometry.center();
+      resolve(textMesh);
+    }, 
+    undefined,
+    reject
+    );
   });
 }
 
@@ -87,7 +107,7 @@ scene.add(pointLight, ambientLight);
 
 const lightHelper = new THREE.PointLightHelper(pointLight);
 const gridHelper = new THREE.GridHelper(200, 50);
-scene.add(lightHelper, gridHelper);
+//scene.add(lightHelper, gridHelper);
 
 // Interactive Player
 const playerGroup = new THREE.Group();
@@ -188,8 +208,23 @@ function animate() {
   updateCamera();
   renderer.render(scene, camera);
 
-  if (torusBox.containsPoint(playerGroup.position)) {
+  if (introTorusBox.containsPoint(playerGroup.position)) {
     switchState(GameState.MAIN);
+  }
+  if (aboutMePortalBox.containsPoint(playerGroup.position)) {
+    // Load About Me section
+    window.location.href = 'about.html';
+    console.log('About Me section');
+  }
+  if (projectsPortalBox.containsPoint(playerGroup.position)) {
+    // Load Projects section
+    window.location.href = 'projects.html';
+    console.log('Projects section');
+  }
+  if (contactPortalBox.containsPoint(playerGroup.position)) {
+    // Load Contact section
+    window.location.href = 'contact.html';
+    console.log('Contact section');
   }
 }
 
