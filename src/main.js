@@ -196,34 +196,81 @@ for (let i = 0; i < 200; i++) {
   addStar();
 }
 
+// Async load about me, projects, and contact sections
+async function loadSection(section) {
+  const page = await fetch(`${section}.html`);
+  window.location.href = page.url;
+}
+
+// Fate-out and camera zoom animation for portal transitions
+function triggerPortalAnimation(onComplete) {
+  // Fade out effect
+  const overlay = document.getElementsByClassName('fade-out-screen')[0];
+  overlay.style.opacity = '1';
+  // Camera zoom in effect
+  const initialPosition = camera.position.clone();
+  const targetPosition = playerGroup.position.clone().add(new THREE.Vector3(0, 0, -5));
+  const duration = 1000; // ms
+  let startTime = performance.now();
+  function animateCameraZoom(time) {
+    const elapsed = time - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    camera.position.lerpVectors(initialPosition, targetPosition, progress);
+    if (progress < 1) {
+      requestAnimationFrame(animateCameraZoom);
+    } else {
+      overlay.style.opacity = '0';
+      transition = false;
+      onComplete();
+    }
+  }
+  requestAnimationFrame(animateCameraZoom);
+}
+
+
 // Animation loop
 let previousTime = performance.now();
+let transition = false;
 function animate() {
   requestAnimationFrame(animate);
   const currentTime = performance.now();
   const delta = (currentTime - previousTime) / 1000;
   previousTime = currentTime;
 
-  movePlayer(delta);
-  updateCamera();
+  if (!transition) {
+    updateCamera();
+    movePlayer(delta);
+  }
   renderer.render(scene, camera);
 
   if (introTorusBox.containsPoint(playerGroup.position)) {
-    switchState(GameState.MAIN);
+    transition = true;
+    triggerPortalAnimation(() => {
+      switchState(GameState.MAIN);
+    });
   }
   if (aboutMePortalBox.containsPoint(playerGroup.position)) {
     // Load About Me section
-    window.location.href = 'about.html';
+    transition = true;
+    triggerPortalAnimation(() => {
+      loadSection('about');
+    });
     console.log('About Me section');
   }
   if (projectsPortalBox.containsPoint(playerGroup.position)) {
     // Load Projects section
-    window.location.href = 'projects.html';
+    transition = true;
+    triggerPortalAnimation(() => {
+      loadSection('projects');
+    });
     console.log('Projects section');
   }
   if (contactPortalBox.containsPoint(playerGroup.position)) {
     // Load Contact section
-    window.location.href = 'contact.html';
+    transition = true;
+    triggerPortalAnimation(() => {
+      loadSection('contact');
+    });
     console.log('Contact section');
   }
 }
