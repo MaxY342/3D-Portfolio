@@ -100,7 +100,7 @@ loader.load( 'console/scene.gltf', function ( gltf ) {
 // Cursor Effect
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -15);
+const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -25); // Change z position to incrase/decrease effect
 const intersection = new THREE.Vector3();
 
 window.addEventListener('mousemove', (event) => {
@@ -120,6 +120,7 @@ function cursorEffect(object) {
   object.lookAt(targetPoint);
 }
 
+// Animation Loop
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
