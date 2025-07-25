@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="stylesheet" href="src/style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>About Me</title>
   </head>
@@ -10,9 +11,23 @@
 
     <canvas id="bg"></canvas>
 
-    <div>
+    <div class="title-container">
+      <canvas id="title-canvas"></canvas>
       <h1>About Me</h1>
     </div>
-    <!--<script type="module" src="/src/main.js"></script>-->
+    <div class="content-container">
+      <canvas id="title-canvas"></canvas>
+      <p>
+        Hello! I'm a high school student with a passion for creating dynamic and engaging programs ranging from multiple different sectors. I enjoy working with modern technologies and continuously learning new skills to improve my craft. In my free time, I love exploring new programming languages, creating new projects, and sharing knowledge with those around me.
+      </p>
+      <p>
+        Outside of programming, I enjoy working out, reading, playing video games, and spending time with friends and family.
+      </p>
+      <p>
+        Feel free to reach out to me through my contact page or connect with me on social media. I'm always open to new opportunities and collaborations!
+      </p>
+    </div>
+    <script type="module" src="/src/scrollEffect.js"></script>
+    <script type="module" src="/src/aboutMe.js"></script>
   </body>
 </html>

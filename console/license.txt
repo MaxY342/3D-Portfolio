@@ -1,0 +1,11 @@
+Model Information:
+* title:	Retro Gaming Console
+* source:	https://sketchfab.com/3d-models/retro-gaming-console-a10a5dfae8974040945ecb4688aef9dc
+* author:	osaifos (https://sketchfab.com/Seesio)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Retro Gaming Console" (https://sketchfab.com/3d-models/retro-gaming-console-a10a5dfae8974040945ecb4688aef9dc) by osaifos (https://sketchfab.com/Seesio) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

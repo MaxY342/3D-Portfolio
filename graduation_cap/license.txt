@@ -1,0 +1,11 @@
+Model Information:
+* title:	Graduation Cap (With Textures)
+* source:	https://sketchfab.com/3d-models/graduation-cap-with-textures-2e86ede4261e41c4a8f0f14248b73a70
+* author:	Safina Irani (https://sketchfab.com/mirani55)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Graduation Cap (With Textures)" (https://sketchfab.com/3d-models/graduation-cap-with-textures-2e86ede4261e41c4a8f0f14248b73a70) by Safina Irani (https://sketchfab.com/mirani55) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
