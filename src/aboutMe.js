@@ -12,15 +12,7 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight / 1.3);
 camera.position.setZ(30);
-
 renderer.render(scene, camera);
-
-// Torus
-const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
-const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-const torus = new THREE.Mesh(geometry, material);
-torus.position.set(40, 5, -10);
-//scene.add(torus);
 
 // Lighting
 const pointLight = new THREE.PointLight(0xffffff, 200, 100, 1);
@@ -35,7 +27,7 @@ const laptop = new THREE.Group();
 
 loader.load( 'laptop333/result.gltf', function ( gltf ) {
   gltf.scene.rotation.set(0.5, 0.5, 0); // Change starting rotation
-  
+
   laptop.add(gltf.scene);
   laptop.scale.set(0.03, 0.03, 0.03);
   laptop.position.set(40, -15, -5);
