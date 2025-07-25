@@ -67,3 +67,22 @@ p {
   background-color: black;
   z-index: 999;
 }
+
+.hidden {
+  opacity: 0;
+  filter: blur(7px);
+  transform: translateX(-100%);
+  transition: all 1s ease-in-out;
+}
+
+.show {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateX(0);
+}
+
+@media(prefers-reduced-motion) {
+  .hidden {
+    transition: none;
+  }
+}

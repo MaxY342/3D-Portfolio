@@ -71,7 +71,7 @@ loader.load( 'graduation_cap/scene.gltf', function ( gltf ) {
 const book = new THREE.Group();
 
 loader.load( 'book/scene.gltf', function ( gltf ) {
-  gltf.scene.rotation.set(0, 0, 0); // Change starting rotation
+  gltf.scene.rotation.set(0.5, 0, 0); // Change starting rotation
 
   book.add(gltf.scene);
   book.scale.set(4, 4, 4);
