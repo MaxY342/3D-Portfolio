@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!--<link rel="icon" type="image/svg+xml" href="/vite.svg" />-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="src/styles/style.css" />
+    <title>Contact</title>
+  </head>
+  <body>
+
+    <canvas id="bg"></canvas>
+
+    <div class="title-container">
+      <canvas id="title-canvas"></canvas>
+      <h1>Contact Me</h1>
+    </div>
+    <div class="contact-content">
+      <form class="contact-form" id="contact-form">
+        <input type="text" class="first-name" placeholder="First Name" name="firstName" required />
+        <input type="text" class="last-name" placeholder="Last Name" name="lastName" required />
+        <input type="email" class="email" placeholder="Email" name="email" required />
+        <textarea class="message" placeholder="Your Message" name="message" required></textarea>
+        <button id="submit" type="submit">Send</button>
+      </form>
+      <div class="response-message" hidden id="response-message-container">
+        <p class="message-text" id="response-message"></p>
+        <button class="close-button" id="close-button">Close</button>
+      </div>
+      <div class="contact-info">
+        <p>Feel free to reach out to me through the form or connect with me on social media!</p>
+        <p>Email: max.yang342@gmail.com</p>
+      </div>
+    </div>
+    <script type="module" src="src/scripts/scrollEffect.js"></script>
+    <script type="module" src="src/scripts/contact.js"></script>
+  </body>
+</html>

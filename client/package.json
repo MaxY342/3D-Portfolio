@@ -12,6 +12,9 @@
     "vite": "^7.0.0"
   },
   "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "nodemailer": "^7.0.5",
     "three": "^0.177.0"
   }
 }

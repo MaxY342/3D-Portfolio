@@ -1,4 +1,4 @@
-import './style.css'
+import './styles/style.css';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
@@ -116,7 +116,7 @@ scene.add(playerGroup);
 
 const loader = new GLTFLoader();
 
-loader.load( 'low-poly_spaceship/scene.gltf', function ( gltf ) {
+loader.load( 'src/assets/low-poly_spaceship/scene.gltf', function ( gltf ) {
 
   gltf.scene.scale.set(0.5, 0.5, 0.5);
   gltf.scene.position.set(0, -2, 1.5);

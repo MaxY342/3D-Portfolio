@@ -1,4 +1,4 @@
-import './style.css'
+import './styles/style.css'
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
@@ -8,6 +8,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / (window.inner
 const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector('#title-canvas'),
   antialias:true,
+  alpha: true,
 });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight / 1.3);
@@ -25,7 +26,7 @@ scene.add(pointLight, ambientLight);
 const loader = new GLTFLoader();
 const laptop = new THREE.Group();
 
-loader.load( 'laptop333/result.gltf', function ( gltf ) {
+loader.load( 'src/assets/laptop333/result.gltf', function ( gltf ) {
   gltf.scene.rotation.set(0.5, 0.5, 0); // Change starting rotation
 
   laptop.add(gltf.scene);
@@ -40,7 +41,7 @@ loader.load( 'laptop333/result.gltf', function ( gltf ) {
 // Barbell
 const barbell = new THREE.Group();;
 
-loader.load( 'barbell/scene.gltf', function ( gltf ) {
+loader.load( 'src/assets/barbell/scene.gltf', function ( gltf ) {
   gltf.scene.rotation.set(0, 0, 0); // Change starting rotation
 
   barbell.add(gltf.scene);
@@ -55,7 +56,7 @@ loader.load( 'barbell/scene.gltf', function ( gltf ) {
 // Graduation Cap
 const graduationCap = new THREE.Group();;
 
-loader.load( 'graduation_cap/scene.gltf', function ( gltf ) {
+loader.load( 'src/assets/graduation_cap/scene.gltf', function ( gltf ) {
   gltf.scene.rotation.set(0, 0, 0); // Change starting rotation
 
   graduationCap.add(gltf.scene);
@@ -70,7 +71,7 @@ loader.load( 'graduation_cap/scene.gltf', function ( gltf ) {
 // Book
 const book = new THREE.Group();
 
-loader.load( 'book/scene.gltf', function ( gltf ) {
+loader.load( 'src/assets/book/scene.gltf', function ( gltf ) {
   gltf.scene.rotation.set(0.5, 0, 0); // Change starting rotation
 
   book.add(gltf.scene);
@@ -85,7 +86,7 @@ loader.load( 'book/scene.gltf', function ( gltf ) {
 // Gaming Controller
 const controller = new THREE.Group();
 
-loader.load( 'console/scene.gltf', function ( gltf ) {
+loader.load( 'src/assets/console/scene.gltf', function ( gltf ) {
   gltf.scene.rotation.set(0, -1.5, 0); // Change starting rotation
 
   controller.add(gltf.scene);
