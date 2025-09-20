@@ -7,12 +7,65 @@
     <title>Projects</title>
   </head>
   <body>
-
-    <canvas id="bg"></canvas>
-
-    <div>
-      <h1>My Projects</h1>
-    </div>
-    <!--<script type="module" src="/src/main.js"></script>-->
+    <main class="projects-container">
+      <canvas id="projects-bg"></canvas>
+      <header class="projects-header">
+        <div>
+          <h1>My Projects</h1>
+        </div>
+      </header>
+      <div class="button-ui">
+        <div class="carousel-ui" id="carousel-ui">
+          <button class="carousel-button-left" id="left-button">⟵</button>
+          <button class="carousel-button-right" id="right-button">⟶</button>
+        </div>
+        <button class="back-button" id="back-button">back</button>
+      </div>
+      <video id="audio-visualizer-video" loop muted playsinline hidden>
+        <source src="src/assets/audio-visualizer.mp4" type="video/mp4">
+      </video>
+      <video id="tictactoe-video" loop muted playsinline hidden>
+        <source src="src/assets/tictactoe.mp4" type="video/mp4">
+      </video>
+      <video id="portfolio-video" loop, muted, playsinline hidden>
+        <source src="src/assets/portfolio.mp4" type="video/mp4">
+      </video>
+      <video id="netflix-replica-video" loop muted playsinline hidden>
+        <source src="src/assets/netflix-replica.mp4" type="video/mp4">
+      </video>
+      <video id="discord-bot-video" loop muted playsinline hidden>
+        <source src="src/assets/discord-bot.mp4" type="video/mp4">
+      </video>
+      <section class="projects-section" id="projects-section">
+        <div class="project-card" id="audio-visualizer-details">
+          <h2 class="project-header">Project 1: Audio Visualizer</h2>
+          <p class="project-discription">Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorem, tempore voluptas perferendis amet accusantium, numquam suscipit unde necessitatibus sequi iure natus assumenda repellat enim. Sequi ab asperiores expedita, fuga impedit sunt consequuntur exercitationem similique! Eligendi libero perferendis placeat fugiat! Suscipit, ratione vero eaque tenetur earum necessitatibus excepturi. Accusamus aperiam ratione modi voluptatem veritatis eum, consequatur, officia, recusandae explicabo fugiat voluptas obcaecati odio voluptates dicta harum. Repudiandae eveniet suscipit ullam, similique ad ipsum error ex consequuntur facilis, perferendis blanditiis, velit labore dolorum! Tempore, aut et. Architecto numquam nam cupiditate ipsa non dolorem magnam eaque, dignissimos facilis, eligendi commodi quo. Architecto, beatae.</p>
+          <p class="project-image"></p>
+        </div>
+        <div class="project-card" id="tictactoe-details">
+          <h2 class="project-header">Project 2: TicTacToe AI</h2>
+          <p class="project-discription">Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorem, tempore voluptas perferendis amet accusantium, numquam suscipit unde necessitatibus sequi iure natus assumenda repellat enim. Sequi ab asperiores expedita, fuga impedit sunt consequuntur exercitationem similique! Eligendi libero perferendis placeat fugiat! Suscipit, ratione vero eaque tenetur earum necessitatibus excepturi. Accusamus aperiam ratione modi voluptatem veritatis eum, consequatur, officia, recusandae explicabo fugiat voluptas obcaecati odio voluptates dicta harum. Repudiandae eveniet suscipit ullam, similique ad ipsum error ex consequuntur facilis, perferendis blanditiis, velit labore dolorum! Tempore, aut et. Architecto numquam nam cupiditate ipsa non dolorem magnam eaque, dignissimos facilis, eligendi commodi quo. Architecto, beatae.</p>
+          <p class="project-image"></p>
+        </div>
+        <div class="project-card" id="portfolio-details">
+          <h2 class="project-header">Project 3: 3D portfolio</h2>
+          <p class="project-discription">Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorem, tempore voluptas perferendis amet accusantium, numquam suscipit unde necessitatibus sequi iure natus assumenda repellat enim. Sequi ab asperiores expedita, fuga impedit sunt consequuntur exercitationem similique! Eligendi libero perferendis placeat fugiat! Suscipit, ratione vero eaque tenetur earum necessitatibus excepturi. Accusamus aperiam ratione modi voluptatem veritatis eum, consequatur, officia, recusandae explicabo fugiat voluptas obcaecati odio voluptates dicta harum. Repudiandae eveniet suscipit ullam, similique ad ipsum error ex consequuntur facilis, perferendis blanditiis, velit labore dolorum! Tempore, aut et. Architecto numquam nam cupiditate ipsa non dolorem magnam eaque, dignissimos facilis, eligendi commodi quo. Architecto, beatae.</p>
+          <p class="project-image"></p>
+        </div>
+        <div class="project-card" id="netflix-replica-details">
+          <h2 class="project-header">Project 4: Netflix Replica</h2>
+          <p class="project-discription">Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorem, tempore voluptas perferendis amet accusantium, numquam suscipit unde necessitatibus sequi iure natus assumenda repellat enim. Sequi ab asperiores expedita, fuga impedit sunt consequuntur exercitationem similique! Eligendi libero perferendis placeat fugiat! Suscipit, ratione vero eaque tenetur earum necessitatibus excepturi. Accusamus aperiam ratione modi voluptatem veritatis eum, consequatur, officia, recusandae explicabo fugiat voluptas obcaecati odio voluptates dicta harum. Repudiandae eveniet suscipit ullam, similique ad ipsum error ex consequuntur facilis, perferendis blanditiis, velit labore dolorum! Tempore, aut et. Architecto numquam nam cupiditate ipsa non dolorem magnam eaque, dignissimos facilis, eligendi commodi quo. Architecto, beatae.</p>
+          <p class="project-image"></p>
+        </div>
+        <div class="project-card" id="discord-bot-details">
+          <h2 class="project-header">Project 5: Discord Bot</h2>
+          <p class="project-discription">Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorem, tempore voluptas perferendis amet accusantium, numquam suscipit unde necessitatibus sequi iure natus assumenda repellat enim. Sequi ab asperiores expedita, fuga impedit sunt consequuntur exercitationem similique! Eligendi libero perferendis placeat fugiat! Suscipit, ratione vero eaque tenetur earum necessitatibus excepturi. Accusamus aperiam ratione modi voluptatem veritatis eum, consequatur, officia, recusandae explicabo fugiat voluptas obcaecati odio voluptates dicta harum. Repudiandae eveniet suscipit ullam, similique ad ipsum error ex consequuntur facilis, perferendis blanditiis, velit labore dolorum! Tempore, aut et. Architecto numquam nam cupiditate ipsa non dolorem magnam eaque, dignissimos facilis, eligendi commodi quo. Architecto, beatae.</p>
+          <p class="project-image"></p>
+        </div>
+        <div class="projects-carousel" id="projects-carousel"></div>
+      </section>
+    </main>
+    <script type="module" src="src/projects.js"></script>
+    <script type="module" src="src/scripts/scrollEffect.js"></script>
   </body>
 </html>

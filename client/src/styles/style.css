@@ -4,6 +4,10 @@ canvas {
   left: 0;
 }
 
+#bg {
+  overflow: none;
+}
+
 #title-canvas {
   position: absolute;
   top: 0;
@@ -14,10 +18,15 @@ canvas {
   pointer-events: none;
 }
 
+#projects-bg {
+  z-index: 3;
+}
+
 body {
   margin: 0;
   padding: 0;
   overflow: scroll;
+  overflow-x: hidden;
   background-color: rgb(22, 22, 22);
 }
 
@@ -186,4 +195,130 @@ button {
   padding: 1rem;
   cursor: pointer;
   font-size: 1.2rem;
+}
+
+main {
+  width: 100vw;
+  color: white;
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  margin: 0px auto;
+  
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+}
+
+header {
+  background: var(--dark-bg);
+  grid-column: 1 / span 12;
+  font-size: 2.5rem;
+  padding: 22rem;
+  margin-bottom: var(--spacing);
+  z-index: 3;
+}
+
+.projects-header {
+  z-index: 2;
+  background-color: rgb(20, 20, 20);
+}
+
+section {
+  grid-column: 1 / span 12;
+  padding: 1rem;
+  background: var(--dark-bg);
+  font-size: 1.25rem;
+  line-height: 1.5;
+  margin-bottom: var(--spacing);
+}
+
+.projects-section {
+  grid-column: 1 / span 12;
+  padding-top: 10rem;
+  background-color: rgb(32, 32, 32);
+  z-index: 2;
+}
+
+.projects-carousel {
+  padding: 30rem;
+}
+
+.project-card {
+  display: none;
+  position: absolute;
+  grid-template-areas:
+    "header header"
+    "info image";
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  background-color: rgb(19, 19, 19);
+  border-radius: 8px;
+  z-index: 0;
+}
+
+.project-header {
+  grid-area: header;
+  padding: 2rem;
+  color: white;
+  font-size: 2.5rem;
+  margin-left: 11rem;
+}
+
+.project-discription {
+  grid-area: info;
+  padding: 2rem;
+  color: white;
+}
+
+.project-image {
+  grid-area: image;
+  width: 100%;
+  height: auto;
+  max-width: 600px;
+  border-radius: 8px;
+}
+
+.back-button {
+  position: absolute;
+  z-index: 100;
+  display: none;
+  top: 60rem;
+  left: 5rem;
+  background: rgba(255, 255, 255, 0);
+  border: white 2px solid;
+  color: white;
+  opacity: 0.5;
+  border-radius: 1rem;
+  cursor: pointer;
+}
+
+.carousel-ui {
+  margin-top: 35rem;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 55rem;
+  z-index: 100;
+}
+
+.carousel-ui button, .back-button {
+  background: rgba(255, 255, 255, 0);
+  border: white 2px solid;
+  color: white;
+  opacity: 0.5;
+  font-size: 2rem;
+  padding: 1rem 2rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.5s;
+  z-index: 100;
+}
+
+.carousel-ui button:hover, .back-button:hover {
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 1;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }

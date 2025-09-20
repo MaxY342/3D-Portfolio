@@ -23,6 +23,17 @@ camera.position.setZ(30);
 
 renderer.render(scene, camera);
 
+const textureLoader = new THREE.TextureLoader();
+
+textureLoader.load('src/assets/stars-background.jpg', (texture) => {
+  texture.encoding = THREE.sRGBEncoding;
+  scene.background = texture;
+});
+
+renderer.outputEncoding = THREE.sRGBEncoding; // ✅ fixes washed out textures
+renderer.toneMapping = THREE.ACESFilmicToneMapping; // (optional, looks good for space)
+renderer.toneMappingExposure = 0.5; // adjust if still too bright
+
 // Intro Group
 const introGroup = new THREE.Group();
 const portalData = createPortal(10, 0x00ff00, new THREE.Vector3(0, 0, -20));
@@ -182,18 +193,19 @@ function updateCamera() {
   camera.lookAt(playerGroup.position);
 }
 
+//TODO: change to points object
 // Add stars to the scene
 function addStar() {
   const geometry = new THREE.SphereGeometry(0.25, 24, 24);
   const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
   const star = new THREE.Mesh(geometry, material);
 
-  const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(100));
+  const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(200));
   star.position.set(x, y, z);
   scene.add(star);
 }
 
-for (let i = 0; i < 200; i++) {
+for (let i = 0; i < 400; i++) {
   addStar();
 }
 
@@ -203,6 +215,7 @@ async function loadSection(section) {
   window.location.href = page.url;
 }
 
+// TODO: Add star warp effect
 // Fate-out and camera zoom animation for portal transitions
 function triggerPortalAnimation(onComplete) {
   // Fade out effect
