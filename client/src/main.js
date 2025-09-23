@@ -3,6 +3,10 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
+import { bufferAttribute } from 'three/src/nodes/TSL.js';
 
 // Initialize scene, camera, and renderer
 const GameState = {
@@ -25,14 +29,11 @@ renderer.render(scene, camera);
 
 const textureLoader = new THREE.TextureLoader();
 
-textureLoader.load('src/assets/stars-background.jpg', (texture) => {
-  texture.encoding = THREE.sRGBEncoding;
-  scene.background = texture;
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
-renderer.outputEncoding = THREE.sRGBEncoding; // ✅ fixes washed out textures
-renderer.toneMapping = THREE.ACESFilmicToneMapping; // (optional, looks good for space)
-renderer.toneMappingExposure = 0.5; // adjust if still too bright
 
 // Intro Group
 const introGroup = new THREE.Group();
@@ -62,17 +63,20 @@ const contactPortalText = await createText('Contact', 2, contactPortal.position,
 menuGroup.add(aboutMePortal, aboutMePortalText, aboutMePortalBox);
 menuGroup.add(projectsPortal, projectsPortalText, projectsPortalBox);
 menuGroup.add(contactPortal, contactPortalText, contactPortalBox);
-scene.add(menuGroup);
-menuGroup.visible = false;
 
 // Switching states
 function switchState(newState) {
-  if (newState != currentState) {
-    introGroup.visible = false;
-    menuGroup.visible = true;
-    playerGroup.position.set(0, 0, 0); // reposition if needed
+  console.log(`Switching to state: ${newState}`);
+  if (newState == GameState.MENU) {
+    scene.remove(introGroup);
+    scene.add(menuGroup);
+    playerGroup.position.set(0, 0, 0);
   }
-
+  else {
+    scene.remove(menuGroup);
+    scene.add(introGroup);
+    playerGroup.position.set(0, 0, 0);
+  }
   currentState = newState;
 }
 
@@ -116,10 +120,6 @@ pointLight.position.set(20, 20, 20);
 
 const ambientLight = new THREE.AmbientLight(0xffffff);
 scene.add(pointLight, ambientLight);
-
-const lightHelper = new THREE.PointLightHelper(pointLight);
-const gridHelper = new THREE.GridHelper(200, 50);
-//scene.add(lightHelper, gridHelper);
 
 // Interactive Player
 const playerGroup = new THREE.Group();
@@ -193,21 +193,34 @@ function updateCamera() {
   camera.lookAt(playerGroup.position);
 }
 
-//TODO: change to points object
-// Add stars to the scene
-function addStar() {
-  const geometry = new THREE.SphereGeometry(0.25, 24, 24);
-  const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
-  const star = new THREE.Mesh(geometry, material);
-
-  const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(200));
-  star.position.set(x, y, z);
-  scene.add(star);
+// Add star field
+const starGeometry = new LineSegmentsGeometry();
+const vertices = [];
+const velocities = [];
+for (let i = 0; i < 2000; i++) {
+  let x = THREE.MathUtils.randFloatSpread(200);
+  let y = THREE.MathUtils.randFloatSpread(200);
+  let z = THREE.MathUtils.randFloatSpread(200);
+  vertices.push(x, y, z+0.001, x, y, z); // leading and trailing points
+  velocities.push(0, 0)
 }
-
-for (let i = 0; i < 400; i++) {
-  addStar();
-}
+starGeometry.setPositions(vertices);
+const material = new LineMaterial({ 
+  color: 0xffffff, 
+  linewidth: 0.2,
+  worldUnits: true,
+});
+const lines = new LineSegments2(starGeometry, material);
+scene.add(lines);
+/*const starTexture = textureLoader.load('src/assets/star.png');
+const starMaterial = new THREE.PointsMaterial({
+  color: 0xffffff,
+  map: starTexture,
+  transparent: true,
+  size: 1.5,
+});
+const starField = new THREE.Points(starGeometry, starMaterial);
+scene.add(starField);*/
 
 // Async load about me, projects, and contact sections
 async function loadSection(section) {
@@ -216,6 +229,42 @@ async function loadSection(section) {
 }
 
 // TODO: Add star warp effect
+function starWarpEffect() {
+  for (let i = 0; i < velocities.length; i += 2) {
+    // Move trailing + leading points along z
+    vertices[i * 3 + 2] += +0.2; // leading
+    vertices[i * 3 + 5] += +0.15; // trailing
+
+    // Reset if out of view
+    if (vertices[i * 3 + 2] > 100) {
+      const x = THREE.MathUtils.randFloatSpread(200);
+      const y = THREE.MathUtils.randFloatSpread(200);
+      const z = -100;
+      vertices[i * 3 + 0] = x;
+      vertices[i * 3 + 1] = y;
+      vertices[i * 3 + 2] = z;
+      vertices[i * 3 + 3] = x;
+      vertices[i * 3 + 4] = y;
+      vertices[i * 3 + 5] = z;
+    }
+  }
+  starGeometry.setPositions(vertices);
+}
+
+function endStarWarpEffect() {
+  for (let i = 0; i < velocities.length; i += 2) {
+    // Match trailing with leading points
+    if (vertices[i * 3 + 5] < vertices[i * 3 + 2]) {
+      vertices[i * 3 + 5] += 0.5;
+    }
+    // Compensate for overshoot
+    if (vertices[i * 3 + 5] > vertices[i * 3 + 2] + 0.001) {
+      vertices[i * 3 + 5] = vertices[i * 3 + 2] - 0.001;
+    }
+  }
+  starGeometry.setPositions(vertices);
+}
+
 // Fate-out and camera zoom animation for portal transitions
 function triggerPortalAnimation(onComplete) {
   // Fade out effect
@@ -227,6 +276,7 @@ function triggerPortalAnimation(onComplete) {
   const duration = 1000; // ms
   let startTime = performance.now();
   function animateCameraZoom(time) {
+    starWarpEffect();
     const elapsed = time - startTime;
     const progress = Math.min(elapsed / duration, 1);
     camera.position.lerpVectors(initialPosition, targetPosition, progress);
@@ -250,9 +300,11 @@ function animate() {
   const currentTime = performance.now();
   const delta = (currentTime - previousTime) / 1000;
   previousTime = currentTime;
+  starWarpEffect();
 
   if (!transition) {
     updateCamera();
+    endStarWarpEffect();
     movePlayer(delta);
   }
   renderer.render(scene, camera);
@@ -260,7 +312,7 @@ function animate() {
   if (introTorusBox.containsPoint(playerGroup.position)) {
     transition = true;
     triggerPortalAnimation(() => {
-      switchState(GameState.MAIN);
+      switchState(GameState.MENU);
     });
   }
   if (aboutMePortalBox.containsPoint(playerGroup.position)) {
