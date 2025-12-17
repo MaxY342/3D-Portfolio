@@ -279,18 +279,26 @@ section {
   border-radius: 8px;
 }
 
+.button-ui {
+  z-index: 100;
+}
+
 .back-button {
   position: absolute;
   z-index: 100;
-  display: none;
-  top: 60rem;
-  left: 5rem;
+  left: 2rem;
   background: rgba(255, 255, 255, 0);
   border: white 2px solid;
   color: white;
   opacity: 0.5;
   border-radius: 1rem;
   cursor: pointer;
+  transition: all 0.5s;
+}
+
+#index-back-button {
+  top: 2rem;
+  display: none;
 }
 
 .carousel-ui {
@@ -303,17 +311,10 @@ section {
   z-index: 100;
 }
 
-.carousel-ui button, .back-button {
-  background: rgba(255, 255, 255, 0);
-  border: white 2px solid;
-  color: white;
-  opacity: 0.5;
-  font-size: 2rem;
-  padding: 1rem 2rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  transition: all 0.5s;
-  z-index: 100;
+.carousel-ui button, #projects-back-button {
+  left: 5rem;
+  top: 60rem;
+  display: none;
 }
 
 .carousel-ui button:hover, .back-button:hover {

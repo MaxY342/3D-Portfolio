@@ -7,13 +7,14 @@ import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
 
-// Initialize scene, camera, and renderer
+// Initialize states
 const GameState = {
   INTRO: 'intro',
   MENU: 'menu'
 }
 let currentState = GameState.INTRO;
 
+// Initialize scene, camera, and renderer
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({
@@ -285,11 +286,27 @@ function triggerPortalAnimation(onComplete) {
 // Animation loop
 let previousTime = performance.now();
 let transition = false;
+const backButton = document.getElementById('index-back-button');
 function animate() {
   requestAnimationFrame(animate);
   const currentTime = performance.now();
   const delta = (currentTime - previousTime) / 1000;
   previousTime = currentTime;
+
+  // Back button fuctionality
+  if (currentState === GameState.MENU) {
+    backButton.style.display = 'block';
+  }
+  backButton.addEventListener('click', () => {
+    if (currentState === GameState.MENU && !transition) {
+      transition = true;
+      triggerPortalAnimation(() => {
+        switchState(GameState.INTRO);
+        backButton.style.display = 'none';
+      });
+    }
+  });
+
   if (movingForward) {
     starWarpEffect();
   }
