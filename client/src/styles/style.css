@@ -283,10 +283,9 @@ section {
   z-index: 100;
 }
 
-.back-button {
+.back-button, .carousel-ui button {
   position: absolute;
   z-index: 100;
-  left: 2rem;
   background: rgba(255, 255, 255, 0);
   border: white 2px solid;
   color: white;
@@ -296,7 +295,13 @@ section {
   transition: all 0.5s;
 }
 
+.carousel-ui button {
+  position: relative;
+  padding: 1rem 2rem;
+}
+
 #index-back-button {
+  left: 2rem;
   top: 2rem;
   display: none;
 }
@@ -311,7 +316,7 @@ section {
   z-index: 100;
 }
 
-.carousel-ui button, #projects-back-button {
+#projects-back-button {
   left: 5rem;
   top: 60rem;
   display: none;

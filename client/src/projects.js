@@ -198,7 +198,7 @@ document.addEventListener('click', (event) => {
       scene.add(laptop);
       projectDetails[carouselIndex].style.display = 'grid';
       document.getElementById('carousel-ui').style.display = 'none';
-      document.getElementById('back-button').style.display = 'block';
+      document.getElementById('projects-back-button').style.display = 'block';
       // Change laptop screen texture to project video
       laptop.traverse(function (child) {
         applyScreenTexture(projects[carouselIndex].video);
@@ -216,7 +216,7 @@ backButtons.forEach(button => {
     scene.remove(laptop);
     scene.add(group);
     document.getElementById('carousel-ui').style.display = 'flex';
-    document.getElementById('back-button').style.display = 'none';
+    document.getElementById('projects-back-button').style.display = 'none';
   });
 });
 
