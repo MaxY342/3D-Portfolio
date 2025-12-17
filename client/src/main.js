@@ -6,7 +6,6 @@ import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
-import { bufferAttribute } from 'three/src/nodes/TSL.js';
 
 // Initialize scene, camera, and renderer
 const GameState = {
@@ -26,8 +25,6 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 camera.position.setZ(30);
 
 renderer.render(scene, camera);
-
-const textureLoader = new THREE.TextureLoader();
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -151,12 +148,18 @@ window.addEventListener('keyup', (event) => {
   keysPressed[event.key.toLowerCase()] = false;
 })
 
+let movingForward = false;
 function movePlayer(delta) {
   const speed = 10;
   const direction = new THREE.Vector3();
   const rotation = playerGroup.rotation;
 
-  if (keysPressed['w']) direction.z -= 1;
+  if (keysPressed['w']) {
+    direction.z -= 1;
+    movingForward = true;
+  } else {
+    movingForward = false;
+  }
   if (keysPressed['s']) direction.z += 1;
   if (keysPressed['a']) {
     if (keysPressed['w'] || keysPressed['s']) {
@@ -197,10 +200,10 @@ function updateCamera() {
 const starGeometry = new LineSegmentsGeometry();
 const vertices = [];
 const velocities = [];
-for (let i = 0; i < 2000; i++) {
-  let x = THREE.MathUtils.randFloatSpread(200);
-  let y = THREE.MathUtils.randFloatSpread(200);
-  let z = THREE.MathUtils.randFloatSpread(200);
+for (let i = 0; i < 1200; i++) {
+  let x = THREE.MathUtils.randFloatSpread(300);
+  let y = THREE.MathUtils.randFloatSpread(300);
+  let z = THREE.MathUtils.randFloatSpread(300);
   vertices.push(x, y, z+0.001, x, y, z); // leading and trailing points
   velocities.push(0, 0)
 }
@@ -212,15 +215,6 @@ const material = new LineMaterial({
 });
 const lines = new LineSegments2(starGeometry, material);
 scene.add(lines);
-/*const starTexture = textureLoader.load('src/assets/star.png');
-const starMaterial = new THREE.PointsMaterial({
-  color: 0xffffff,
-  map: starTexture,
-  transparent: true,
-  size: 1.5,
-});
-const starField = new THREE.Points(starGeometry, starMaterial);
-scene.add(starField);*/
 
 // Async load about me, projects, and contact sections
 async function loadSection(section) {
@@ -232,14 +226,14 @@ async function loadSection(section) {
 function starWarpEffect() {
   for (let i = 0; i < velocities.length; i += 2) {
     // Move trailing + leading points along z
-    vertices[i * 3 + 2] += +0.2; // leading
-    vertices[i * 3 + 5] += +0.15; // trailing
+    vertices[i * 3 + 2] += +1.0; // leading
+    vertices[i * 3 + 5] += +0.6; // trailing
 
     // Reset if out of view
     if (vertices[i * 3 + 2] > 100) {
-      const x = THREE.MathUtils.randFloatSpread(200);
-      const y = THREE.MathUtils.randFloatSpread(200);
-      const z = -100;
+      const x = THREE.MathUtils.randFloatSpread(300);
+      const y = THREE.MathUtils.randFloatSpread(300);
+      const z = -150;
       vertices[i * 3 + 0] = x;
       vertices[i * 3 + 1] = y;
       vertices[i * 3 + 2] = z;
@@ -255,11 +249,7 @@ function endStarWarpEffect() {
   for (let i = 0; i < velocities.length; i += 2) {
     // Match trailing with leading points
     if (vertices[i * 3 + 5] < vertices[i * 3 + 2]) {
-      vertices[i * 3 + 5] += 0.5;
-    }
-    // Compensate for overshoot
-    if (vertices[i * 3 + 5] > vertices[i * 3 + 2] + 0.001) {
-      vertices[i * 3 + 5] = vertices[i * 3 + 2] - 0.001;
+      vertices[i * 3 + 5] = THREE.MathUtils.lerp(vertices[i * 3 + 5], vertices[i * 3 + 2] + 0.002, 0.15);
     }
   }
   starGeometry.setPositions(vertices);
@@ -269,12 +259,12 @@ function endStarWarpEffect() {
 function triggerPortalAnimation(onComplete) {
   // Fade out effect
   const overlay = document.getElementsByClassName('fade-out-screen')[0];
-  overlay.style.opacity = '1';
   // Camera zoom in effect
   const initialPosition = camera.position.clone();
   const targetPosition = playerGroup.position.clone().add(new THREE.Vector3(0, 0, -5));
-  const duration = 1000; // ms
+  const duration = 1500; // ms
   let startTime = performance.now();
+  overlay.style.opacity = '1';
   function animateCameraZoom(time) {
     starWarpEffect();
     const elapsed = time - startTime;
@@ -300,7 +290,9 @@ function animate() {
   const currentTime = performance.now();
   const delta = (currentTime - previousTime) / 1000;
   previousTime = currentTime;
-  starWarpEffect();
+  if (movingForward) {
+    starWarpEffect();
+  }
 
   if (!transition) {
     updateCamera();
@@ -308,36 +300,37 @@ function animate() {
     movePlayer(delta);
   }
   renderer.render(scene, camera);
-
-  if (introTorusBox.containsPoint(playerGroup.position)) {
-    transition = true;
-    triggerPortalAnimation(() => {
-      switchState(GameState.MENU);
-    });
-  }
-  if (aboutMePortalBox.containsPoint(playerGroup.position)) {
-    // Load About Me section
-    transition = true;
-    triggerPortalAnimation(() => {
-      loadSection('about');
-    });
-    console.log('About Me section');
-  }
-  if (projectsPortalBox.containsPoint(playerGroup.position)) {
-    // Load Projects section
-    transition = true;
-    triggerPortalAnimation(() => {
-      loadSection('projects');
-    });
-    console.log('Projects section');
-  }
-  if (contactPortalBox.containsPoint(playerGroup.position)) {
-    // Load Contact section
-    transition = true;
-    triggerPortalAnimation(() => {
-      loadSection('contact');
-    });
-    console.log('Contact section');
+  if (!transition) {
+    if (introTorusBox.containsPoint(playerGroup.position) && currentState === GameState.INTRO) {
+      transition = true;
+      triggerPortalAnimation(() => {
+        switchState(GameState.MENU);
+      });
+    }
+    if (aboutMePortalBox.containsPoint(playerGroup.position) && currentState === GameState.MENU) {
+      // Load About Me section
+      transition = true;
+      triggerPortalAnimation(() => {
+        loadSection('about');
+      });
+      console.log('About Me section');
+    }
+    if (projectsPortalBox.containsPoint(playerGroup.position) && currentState === GameState.MENU) {
+      // Load Projects section
+      transition = true;
+      triggerPortalAnimation(() => {
+        loadSection('projects');
+      });
+      console.log('Projects section');
+    }
+    if (contactPortalBox.containsPoint(playerGroup.position) && currentState === GameState.MENU) {
+      // Load Contact section
+      transition = true;
+      triggerPortalAnimation(() => {
+        loadSection('contact');
+      });
+      console.log('Contact section');
+    }
   }
 }
 
