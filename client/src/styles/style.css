@@ -186,6 +186,9 @@ button#submit {
   padding: 2rem;
   border-radius: 8px;
   z-index: 5;
+  align-items: center;
+  display: none;
+  flex-direction: column;
 }
 
 button {
