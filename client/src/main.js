@@ -1,3 +1,4 @@
+// TODO: Put css into html
 import './styles/style.css';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -6,6 +7,8 @@ import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
+import vertexShader from './shaders/vertex.glsl';
+import fragmentShader from './shaders/fragment.glsl';
 
 // Initialize states
 const GameState = {
@@ -282,6 +285,60 @@ function triggerPortalAnimation(onComplete) {
   requestAnimationFrame(animateCameraZoom);
 }
 
+// Particle System
+// TODO: Animate particles to simulate jet thrusters
+class ParticleSystem {
+  constructor(params) {
+    const uniforms = {
+      diffuseTexture: {
+        value: new THREE.TextureLoader().load('src/assets/star.png'),
+      },
+      pointMultiplier: {
+        value: window.innerHeight / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)),
+      },
+    };
+    this.material = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
+      blending: THREE.AdditiveBlending,
+      depthTest: false,
+      transparent: true,
+    });
+    this.camera = params.camera;
+    this.particles = [];
+    this.geometry = new THREE.BufferGeometry();
+    this.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3));
+    this.points = new THREE.Points(this.geometry, this.material);
+    params.scene.add(this.points);
+    this.AddParticles();
+    this.UpdateGeometry();
+  }
+  
+  AddParticles() {
+    for (let i = 0; i < 10; i++) {
+      const particle = {
+        position: new THREE.Vector3(
+          THREE.MathUtils.randFloatSpread(5),
+          THREE.MathUtils.randFloatSpread(5),
+          THREE.MathUtils.randFloatSpread(5)
+        ),
+      };
+      this.particles.push(particle);
+    }
+  }
+  
+  UpdateGeometry() {
+    const positions = [];
+    this.particles.forEach((particle) => {
+      positions.push(particle.position.x, particle.position.y, particle.position.z);
+    });
+    this.geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    this.geometry.attributes.position.needsUpdate = true;
+  }
+}
+
+const particleSystem = new ParticleSystem({ scene, camera });
 
 // Animation loop
 let previousTime = performance.now();
