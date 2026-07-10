@@ -286,7 +286,7 @@ function triggerPortalAnimation(onComplete) {
 }
 
 // Particle System
-// TODO: Animate particles to simulate jet thrusters
+// TODO: Animate particles to simulate jet thrusters (add colour change, size change, and opacity change)
 class ParticleSystem {
   constructor(params) {
     const uniforms = {
@@ -310,22 +310,25 @@ class ParticleSystem {
     this.geometry = new THREE.BufferGeometry();
     this.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3));
     this.points = new THREE.Points(this.geometry, this.material);
-    params.scene.add(this.points);
-    this.AddParticles();
-    this.UpdateGeometry();
+    scene.add(this.points);
   }
   
-  AddParticles() {
-    for (let i = 0; i < 10; i++) {
-      const particle = {
-        position: new THREE.Vector3(
-          THREE.MathUtils.randFloatSpread(5),
-          THREE.MathUtils.randFloatSpread(5),
-          THREE.MathUtils.randFloatSpread(5)
-        ),
-      };
-      this.particles.push(particle);
+  AddParticle(position, velocity, lifetime) {
+    const particle = {
+      position: new THREE.Vector3(
+        position.x + THREE.MathUtils.randFloatSpread(0.5),
+        position.y + THREE.MathUtils.randFloatSpread(0.5),
+        position.z + THREE.MathUtils.randFloatSpread(0.5)
+      ),
+      velocity: new THREE.Vector3(
+        velocity.x + THREE.MathUtils.randFloatSpread(1.0),
+        velocity.y + THREE.MathUtils.randFloatSpread(1.0),
+        velocity.z + THREE.MathUtils.randFloatSpread(1.0)
+      ),
+      lifetime: lifetime,
+      opacity: 1.0,
     }
+    this.particles.push(particle);
   }
   
   UpdateGeometry() {
@@ -336,37 +339,57 @@ class ParticleSystem {
     this.geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     this.geometry.attributes.position.needsUpdate = true;
   }
+
+  RemoveParticle(particle) {
+    this.particles = this.particles.filter(p => p !== particle);
+  }
 }
 
 const particleSystem = new ParticleSystem({ scene, camera });
 
+// Menu state back button functionality
+const backButton = document.getElementById('index-back-button');
+backButton.addEventListener('click', () => {
+  if (currentState === GameState.MENU && !transition) {
+    transition = true;
+    triggerPortalAnimation(() => {
+      switchState(GameState.INTRO);
+      backButton.style.display = 'none';
+    });
+  }
+});
+
 // Animation loop
 let previousTime = performance.now();
 let transition = false;
-const backButton = document.getElementById('index-back-button');
 function animate() {
   requestAnimationFrame(animate);
   const currentTime = performance.now();
   const delta = (currentTime - previousTime) / 1000;
   previousTime = currentTime;
 
-  // Back button fuctionality
   if (currentState === GameState.MENU) {
     backButton.style.display = 'block';
   }
-  backButton.addEventListener('click', () => {
-    if (currentState === GameState.MENU && !transition) {
-      transition = true;
-      triggerPortalAnimation(() => {
-        switchState(GameState.INTRO);
-        backButton.style.display = 'none';
-      });
-    }
-  });
 
   if (movingForward) {
     starWarpEffect();
+    const spawnPosition = new THREE.Vector3(0.2, 0.2, 1.7);
+    const direction = new THREE.Vector3(0, 0, 1);
+    playerGroup.localToWorld(spawnPosition);
+    direction.applyQuaternion(playerGroup.quaternion);
+    particleSystem.AddParticle(spawnPosition, direction.multiplyScalar(5), 2);
   }
+
+  for (let i = 0; i < particleSystem.particles.length; i++) {
+    const particle = particleSystem.particles[i];
+    particle.position.addScaledVector(particle.velocity, delta);
+    particle.lifetime -= delta;
+    if (particle.lifetime <= 0) {
+        particleSystem.RemoveParticle(particle);
+    }
+  }
+  particleSystem.UpdateGeometry();
 
   if (!transition) {
     updateCamera();
