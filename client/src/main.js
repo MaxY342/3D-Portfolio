@@ -309,11 +309,12 @@ class ParticleSystem {
     this.particles = [];
     this.geometry = new THREE.BufferGeometry();
     this.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3));
+    this.geometry.setAttribute('opacity', new THREE.Float32BufferAttribute([], 1));
     this.points = new THREE.Points(this.geometry, this.material);
     scene.add(this.points);
   }
   
-  AddParticle(position, velocity, lifetime) {
+  AddParticle(position, velocity, lifetime, color) {
     const particle = {
       position: new THREE.Vector3(
         position.x + THREE.MathUtils.randFloatSpread(0.5),
@@ -326,18 +327,28 @@ class ParticleSystem {
         velocity.z + THREE.MathUtils.randFloatSpread(1.0)
       ),
       lifetime: lifetime,
+      maxLifetime: lifetime,
       opacity: 1.0,
+      color: color,
     }
     this.particles.push(particle);
   }
   
   UpdateGeometry() {
     const positions = [];
+    const opacities = [];
+    const colors = [];
     this.particles.forEach((particle) => {
       positions.push(particle.position.x, particle.position.y, particle.position.z);
+      opacities.push(particle.opacity);
+      colors.push(particle.color.r, particle.color.g, particle.color.b);
     });
     this.geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    this.geometry.setAttribute('opacity', new THREE.Float32BufferAttribute(opacities, 1));
+    this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
     this.geometry.attributes.position.needsUpdate = true;
+    this.geometry.attributes.opacity.needsUpdate = true;
+    this.geometry.attributes.color.needsUpdate = true;
   }
 
   RemoveParticle(particle) {
@@ -378,13 +389,17 @@ function animate() {
     const direction = new THREE.Vector3(0, 0, 1);
     playerGroup.localToWorld(spawnPosition);
     direction.applyQuaternion(playerGroup.quaternion);
-    particleSystem.AddParticle(spawnPosition, direction.multiplyScalar(5), 2);
+    particleSystem.AddParticle(spawnPosition, direction.multiplyScalar(5), 1.5, new THREE.Color(0x00ffff));
   }
 
   for (let i = 0; i < particleSystem.particles.length; i++) {
     const particle = particleSystem.particles[i];
     particle.position.addScaledVector(particle.velocity, delta);
     particle.lifetime -= delta;
+    const lifeRatio = particle.lifetime / particle.maxLifetime;
+    const endColor = new THREE.Color(0xffffff);
+    particle.opacity = Math.max(lifeRatio, 0);
+    particle.color.lerp(endColor, 0.05);
     if (particle.lifetime <= 0) {
         particleSystem.RemoveParticle(particle);
     }
