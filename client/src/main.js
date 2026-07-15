@@ -303,6 +303,7 @@ class ParticleSystem {
       fragmentShader: fragmentShader,
       blending: THREE.AdditiveBlending,
       depthTest: false,
+      depthWrite: false,
       transparent: true,
     });
     this.camera = params.camera;
@@ -330,6 +331,7 @@ class ParticleSystem {
       maxLifetime: lifetime,
       opacity: 1.0,
       color: color,
+      size: 1.0,
     }
     this.particles.push(particle);
   }
@@ -338,17 +340,21 @@ class ParticleSystem {
     const positions = [];
     const opacities = [];
     const colors = [];
+    const sizes = [];
     this.particles.forEach((particle) => {
       positions.push(particle.position.x, particle.position.y, particle.position.z);
       opacities.push(particle.opacity);
       colors.push(particle.color.r, particle.color.g, particle.color.b);
+      sizes.push(particle.size);
     });
     this.geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     this.geometry.setAttribute('opacity', new THREE.Float32BufferAttribute(opacities, 1));
     this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    this.geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
     this.geometry.attributes.position.needsUpdate = true;
     this.geometry.attributes.opacity.needsUpdate = true;
     this.geometry.attributes.color.needsUpdate = true;
+    this.geometry.attributes.size.needsUpdate = true;
   }
 
   RemoveParticle(particle) {
@@ -395,11 +401,13 @@ function animate() {
   for (let i = 0; i < particleSystem.particles.length; i++) {
     const particle = particleSystem.particles[i];
     particle.position.addScaledVector(particle.velocity, delta);
+    particle.velocity.multiplyScalar(0.98);
     particle.lifetime -= delta;
     const lifeRatio = particle.lifetime / particle.maxLifetime;
     const endColor = new THREE.Color(0xffffff);
     particle.opacity = Math.max(lifeRatio, 0);
     particle.color.lerp(endColor, 0.05);
+    particle.size = THREE.MathUtils.lerp(1.0, 0.1, 1 - lifeRatio);
     if (particle.lifetime <= 0) {
         particleSystem.RemoveParticle(particle);
     }
