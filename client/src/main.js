@@ -65,22 +65,6 @@ menuGroup.add(aboutMePortal, aboutMePortalText, aboutMePortalBox);
 menuGroup.add(projectsPortal, projectsPortalText, projectsPortalBox);
 menuGroup.add(contactPortal, contactPortalText, contactPortalBox);
 
-// Switching states
-function switchState(newState) {
-  console.log(`Switching to state: ${newState}`);
-  if (newState == GameState.MENU) {
-    scene.remove(introGroup);
-    scene.add(menuGroup);
-    playerGroup.position.set(0, 0, 0);
-  }
-  else {
-    scene.remove(menuGroup);
-    scene.add(introGroup);
-    playerGroup.position.set(0, 0, 0);
-  }
-  currentState = newState;
-}
-
 // Portal
 function createPortal(radius, color, position) {
   const geometry = new THREE.TorusGeometry(radius, 3, 16, 100);
@@ -140,6 +124,29 @@ loader.load( 'src/assets/low-poly_spaceship/scene.gltf', function ( gltf ) {
   console.error( error );
 
 } );
+
+// Switching states
+function switchState(newState) {
+  console.log(`Switching to state: ${newState}`);
+  if (newState == GameState.MENU) {
+    scene.remove(introGroup);
+    scene.add(menuGroup);
+    playerGroup.position.set(0, 0, 0);
+  }
+  else {
+    scene.remove(menuGroup);
+    scene.add(introGroup);
+    playerGroup.position.set(0, 0, 0);
+  }
+  currentState = newState;
+}
+const params = new URLSearchParams(window.location.search);
+const state = params.get('state');
+if (state === "menu") {
+    switchState(GameState.MENU);
+} else {
+    switchState(GameState.INTRO);
+}
 
 // User movement
 const keysPressed = {};

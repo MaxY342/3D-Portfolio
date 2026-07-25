@@ -28,3 +28,8 @@ const cube = new THREE.Mesh(
   new THREE.MeshStandardMaterial({ color: 0x00ff00 })
 );
 scene.add(cube);
+
+const backButton = document.getElementById('about-back-button');
+backButton.addEventListener('click', () => {
+    window.location.href = 'index.html?state=menu';
+});

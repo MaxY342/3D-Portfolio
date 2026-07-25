@@ -181,7 +181,7 @@ function moveCarousel() {
 
 function updateCarouselIndex(direction) {
   // Direction: 1 for right, -1 for left
-  carouselIndex = (carouselIndex + direction + projects.length) % projects.length;
+  carouselIndex = (carouselIndex + direction) % projects.length;
 }
 
 // Logic for clicking a project
@@ -198,7 +198,8 @@ document.addEventListener('click', (event) => {
       scene.add(laptop);
       projectDetails[carouselIndex].style.display = 'grid';
       document.getElementById('carousel-ui').style.display = 'none';
-      document.getElementById('projects-back-button').style.display = 'block';
+      document.getElementById('projects-description-back-button').style.display = 'block';
+      document.getElementById('projects-back-button').style.display = 'none';
       // Change laptop screen texture to project video
       laptop.traverse(function (child) {
         applyScreenTexture(projects[carouselIndex].video);
@@ -208,16 +209,21 @@ document.addEventListener('click', (event) => {
 });
 
 // Project details back button logic
-const backButtons = document.querySelectorAll('.back-button');
-backButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    currentState = States.Carousel;
-    projectDetails[carouselIndex].style.display = 'none';
-    scene.remove(laptop);
-    scene.add(group);
-    document.getElementById('carousel-ui').style.display = 'flex';
-    document.getElementById('projects-back-button').style.display = 'none';
-  });
+const descriptionBackButton = document.getElementById('projects-description-back-button');
+descriptionBackButton.addEventListener('click', () => {
+  currentState = States.Carousel;
+  projectDetails[carouselIndex].style.display = 'none';
+  scene.remove(laptop);
+  scene.add(group);
+  document.getElementById('carousel-ui').style.display = 'flex';
+  document.getElementById('projects-description-back-button').style.display = 'none';
+  document.getElementById('projects-back-button').style.display = 'block';
+});
+
+//Projects back button logic
+const projectsBackButton = document.getElementById('projects-back-button');
+projectsBackButton.addEventListener('click', () => {
+  window.location.href = 'index.html?state=menu';
 });
 
 

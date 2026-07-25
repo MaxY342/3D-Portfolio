@@ -26,3 +26,8 @@ closeButton.addEventListener('click', () => {
     document.getElementById('response-message-container').style.display = 'none';
     contactForm.reset();
 });
+
+const backButton = document.getElementById('contact-back-button');
+backButton.addEventListener('click', () => {
+    window.location.href = 'index.html?state=menu';
+});

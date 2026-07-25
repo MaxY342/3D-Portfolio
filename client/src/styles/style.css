@@ -19,15 +19,13 @@ canvas {
 }
 
 #projects-bg {
-  z-index: 3;
+  z-index: 4;
 }
 
 body {
   margin: 0;
   padding: 0;
-  overflow: scroll;
-  overflow-x: hidden;
-  background-color: rgb(22, 22, 22);
+  background-color: rgb(20, 20, 20);
 }
 
 .title-container {
@@ -206,10 +204,8 @@ main {
   z-index: 1;
   position: absolute;
   width: 100%;
-  margin: 0px auto;
-  
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  display: flex;
+  flex-direction: column;
 }
 
 header {
@@ -222,7 +218,6 @@ header {
 }
 
 .projects-header {
-  z-index: 2;
   background-color: rgb(20, 20, 20);
 }
 
@@ -236,10 +231,9 @@ section {
 }
 
 .projects-section {
-  grid-column: 1 / span 12;
   padding-top: 10rem;
   background-color: rgb(32, 32, 32);
-  z-index: 2;
+  z-index: 3;
 }
 
 .projects-carousel {
@@ -304,9 +298,19 @@ section {
 }
 
 #index-back-button {
-  left: 2rem;
-  top: 2rem;
+  left: 1rem;
+  top: 1rem;
   display: none;
+}
+
+#contact-back-button, #about-back-button, #projects-back-button {
+  left: 1rem;
+  top: 1rem;
+  position: sticky;
+}
+
+#projects-back-button {
+  align-self: flex-start;
 }
 
 .carousel-ui {
@@ -319,7 +323,7 @@ section {
   z-index: 100;
 }
 
-#projects-back-button {
+#projects-description-back-button {
   left: 5rem;
   top: 60rem;
   display: none;
