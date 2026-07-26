@@ -362,6 +362,8 @@ class ParticleSystem {
     this.geometry.attributes.opacity.needsUpdate = true;
     this.geometry.attributes.color.needsUpdate = true;
     this.geometry.attributes.size.needsUpdate = true;
+
+    this.geometry.computeBoundingSphere();
   }
 
   RemoveParticle(particle) {
