@@ -149,6 +149,7 @@ if (state === "menu") {
 }
 
 // User movement
+// TODO: Add velocity and acceleration to movement for more realistic physics
 const keysPressed = {};
 
 window.addEventListener('keydown', (event) => {
@@ -293,7 +294,6 @@ function triggerPortalAnimation(onComplete) {
 }
 
 // Particle System
-// TODO: Animate particles to simulate jet thrusters (add colour change, size change, and opacity change)
 class ParticleSystem {
   constructor(params) {
     const uniforms = {
