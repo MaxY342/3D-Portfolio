@@ -176,11 +176,19 @@ function movePlayer(delta) {
     }
   }
   if (keysPressed['a']) {
-    rotation.y += 0.02;
+    if (keysPressed['w']) {
+      rotation.y += 0.02;
+    } else if (keysPressed['s']) {
+      rotation.y -= 0.02;
+    }
     rotation.z += 0.02;
   }
   if (keysPressed['d']) {
-    rotation.y -= 0.02;
+    if (keysPressed['w']) {
+      rotation.y -= 0.02;
+    } else if (keysPressed['s']) {
+      rotation.y += 0.02;
+    }
     rotation.z -= 0.02;
   }
   if (rotation.z > 0.3) {
