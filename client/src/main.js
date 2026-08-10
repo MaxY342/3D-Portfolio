@@ -139,13 +139,8 @@ function switchState(newState) {
     playerGroup.position.set(0, 0, 0);
   }
   currentState = newState;
-}
-const params = new URLSearchParams(window.location.search);
-const state = params.get('state');
-if (state === "menu") {
-    switchState(GameState.MENU);
-} else {
-    switchState(GameState.INTRO);
+  speed = 0;
+  particleSystem.particles = [];
 }
 
 // User movement
@@ -161,29 +156,32 @@ window.addEventListener('keyup', (event) => {
 })
 
 let movingForward = false;
+let speed = 0;
 function movePlayer(delta) {
-  const speed = 10;
+  const acceleration = 10;
+  const deceleration = 15;
+  const topSpeed = 20;
+  const minSpeed = -10;
   const direction = new THREE.Vector3();
   const rotation = playerGroup.rotation;
 
   if (keysPressed['w']) {
-    direction.z -= 1;
-    movingForward = true;
-  } else {
-    movingForward = false;
-  }
-  if (keysPressed['s']) direction.z += 1;
-  if (keysPressed['a']) {
-    if (keysPressed['w'] || keysPressed['s']) {
-      rotation.y += 0.02;
+    if (speed < topSpeed) {
+      speed += acceleration * delta;
     }
-    rotation.z += 0.05;
+  }
+  if (keysPressed['s']) {
+    if (speed > minSpeed) {
+      speed -= deceleration * delta;
+    }
+  }
+  if (keysPressed['a']) {
+    rotation.y += 0.02;
+    rotation.z += 0.02;
   }
   if (keysPressed['d']) {
-    if (keysPressed['w'] || keysPressed['s']) {
-      rotation.y -= 0.02;
-    }
-    rotation.z -= 0.05;
+    rotation.y -= 0.02;
+    rotation.z -= 0.02;
   }
   if (rotation.z > 0.3) {
     rotation.z = 0.3; // limit rotation
@@ -193,6 +191,21 @@ function movePlayer(delta) {
 
   if (!keysPressed['a'] && !keysPressed['d']) {
     rotation.z *= 0.9; // gradually reduce tilt when not turning
+  }
+
+  if (!keysPressed['w'] && !keysPressed['s']) {
+    speed *= 0.99; // gradually reduce speed when not accelerating
+    if ((speed > 0 && speed < 0.1) || (speed < 0 && speed > -0.1)) {
+      speed = 0; // stop completely if speed is very low
+    }
+  }
+
+  if (speed > 0) {
+    direction.set(0, 0, -1);
+    movingForward = true;
+  } else {
+    direction.set(0, 0, -1);
+    movingForward = false;
   }
 
   direction.normalize();
@@ -211,13 +224,13 @@ function updateCamera() {
 // Add star field
 const starGeometry = new LineSegmentsGeometry();
 const vertices = [];
-const velocities = [];
-for (let i = 0; i < 1200; i++) {
-  let x = THREE.MathUtils.randFloatSpread(300);
-  let y = THREE.MathUtils.randFloatSpread(300);
-  let z = THREE.MathUtils.randFloatSpread(300);
+const starVelocities = [];
+for (let i = 0; i < 1500; i++) {
+  let x = THREE.MathUtils.randFloatSpread(400);
+  let y = THREE.MathUtils.randFloatSpread(400);
+  let z = THREE.MathUtils.randFloatSpread(500);
   vertices.push(x, y, z+0.001, x, y, z); // leading and trailing points
-  velocities.push(0, 0)
+  starVelocities.push(0, 0)
 }
 starGeometry.setPositions(vertices);
 const material = new LineMaterial({ 
@@ -234,18 +247,32 @@ async function loadSection(section) {
   window.location.href = page.url;
 }
 
-// TODO: Add star warp effect
+// Star warp effect
 function starWarpEffect() {
-  for (let i = 0; i < velocities.length; i += 2) {
-    // Move trailing + leading points along z
-    vertices[i * 3 + 2] += +1.0; // leading
-    vertices[i * 3 + 5] += +0.6; // trailing
+  // While moving forward
+  if (movingForward) {
+    starVelocities.forEach((_, index) => {
+      if (index % 2 === 0) {
+        starVelocities[index] = speed * 0.1; // leading point
+      } else {
+        starVelocities[index] = speed * 0.06; // trailing point
+      }
+    });
+  } else { // During portal transition
+    for (let i = 0; i < starVelocities.length; i += 2) {
+      starVelocities[i] = 2.0; // leading point
+      starVelocities[i + 1] = 1.8; // trailing point
+    }
+  }
+  for (let i = 0; i < starVelocities.length; i += 2) {
+    vertices[i * 3 + 2] += starVelocities[i]; // leading point
+    vertices[i * 3 + 5] += starVelocities[i + 1]; // trailing point
 
     // Reset if out of view
     if (vertices[i * 3 + 2] > 100) {
-      const x = THREE.MathUtils.randFloatSpread(300);
-      const y = THREE.MathUtils.randFloatSpread(300);
-      const z = -150;
+      const x = THREE.MathUtils.randFloatSpread(400);
+      const y = THREE.MathUtils.randFloatSpread(400);
+      const z = -250;
       vertices[i * 3 + 0] = x;
       vertices[i * 3 + 1] = y;
       vertices[i * 3 + 2] = z;
@@ -258,7 +285,7 @@ function starWarpEffect() {
 }
 
 function endStarWarpEffect() {
-  for (let i = 0; i < velocities.length; i += 2) {
+  for (let i = 0; i < starVelocities.length; i += 2) {
     // Match trailing with leading points
     if (vertices[i * 3 + 5] < vertices[i * 3 + 2]) {
       vertices[i * 3 + 5] = THREE.MathUtils.lerp(vertices[i * 3 + 5], vertices[i * 3 + 2] + 0.002, 0.15);
@@ -322,27 +349,29 @@ class ParticleSystem {
     scene.add(this.points);
   }
   
-  AddParticle(position, velocity, lifetime, color) {
-    const particle = {
-      position: new THREE.Vector3(
-        position.x + THREE.MathUtils.randFloatSpread(0.5),
-        position.y + THREE.MathUtils.randFloatSpread(0.5),
-        position.z + THREE.MathUtils.randFloatSpread(0.5)
-      ),
-      velocity: new THREE.Vector3(
-        velocity.x + THREE.MathUtils.randFloatSpread(1.0),
-        velocity.y + THREE.MathUtils.randFloatSpread(1.0),
-        velocity.z + THREE.MathUtils.randFloatSpread(1.0)
-      ),
-      lifetime: lifetime,
-      maxLifetime: lifetime,
-      opacity: 1.0,
-      color: color,
-      size: 1.0,
-    }
+  AddParticles(position, velocity, lifetime, color, amount) {
+    for (let i = 0; i < amount; i++) {
+      const particle = {
+        position: new THREE.Vector3(
+          position.x + THREE.MathUtils.randFloatSpread(0.5),
+          position.y + THREE.MathUtils.randFloatSpread(0.5),
+          position.z + THREE.MathUtils.randFloatSpread(0.5)
+        ),
+        velocity: new THREE.Vector3(
+          velocity.x + THREE.MathUtils.randFloatSpread(1.0),
+          velocity.y + THREE.MathUtils.randFloatSpread(1.0),
+          velocity.z + THREE.MathUtils.randFloatSpread(1.0)
+        ),
+        lifetime: lifetime,
+        maxLifetime: lifetime,
+        opacity: 1.0,
+        color: color,
+        size: 1.0,
+      };
     this.particles.push(particle);
+    }
   }
-  
+
   UpdateGeometry() {
     const positions = [];
     const opacities = [];
@@ -385,6 +414,15 @@ backButton.addEventListener('click', () => {
   }
 });
 
+// Initialize state based on URL parameter
+const params = new URLSearchParams(window.location.search);
+const state = params.get('state');
+if (state === "menu") {
+    switchState(GameState.MENU);
+} else {
+    switchState(GameState.INTRO);
+}
+
 // Animation loop
 let previousTime = performance.now();
 let transition = false;
@@ -404,7 +442,7 @@ function animate() {
     const direction = new THREE.Vector3(0, 0, 1);
     playerGroup.localToWorld(spawnPosition);
     direction.applyQuaternion(playerGroup.quaternion);
-    particleSystem.AddParticle(spawnPosition, direction.multiplyScalar(5), 1.5, new THREE.Color(0x00ffff));
+    particleSystem.AddParticles(spawnPosition, direction.multiplyScalar(5), 1.5, new THREE.Color(0x00ffff), 2);
   }
 
   for (let i = 0; i < particleSystem.particles.length; i++) {
