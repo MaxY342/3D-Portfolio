@@ -178,7 +178,7 @@ function movePlayer(delta) {
   if (keysPressed['a']) {
     if (movingForward) {
       rotation.y += 0.02;
-    } else {
+    } else if (speed < 0) {
       rotation.y -= 0.02;
     }
     rotation.z += 0.02;
@@ -186,7 +186,7 @@ function movePlayer(delta) {
   if (keysPressed['d']) {
     if (movingForward) {
       rotation.y -= 0.02;
-    } else {
+    } else if (speed < 0) {
       rotation.y += 0.02;
     }
     rotation.z -= 0.02;
