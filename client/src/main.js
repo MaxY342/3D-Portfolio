@@ -176,17 +176,17 @@ function movePlayer(delta) {
     }
   }
   if (keysPressed['a']) {
-    if (keysPressed['w']) {
+    if (movingForward) {
       rotation.y += 0.02;
-    } else if (keysPressed['s']) {
+    } else {
       rotation.y -= 0.02;
     }
     rotation.z += 0.02;
   }
   if (keysPressed['d']) {
-    if (keysPressed['w']) {
+    if (movingForward) {
       rotation.y -= 0.02;
-    } else if (keysPressed['s']) {
+    } else {
       rotation.y += 0.02;
     }
     rotation.z -= 0.02;
@@ -422,6 +422,24 @@ backButton.addEventListener('click', () => {
   }
 });
 
+// Speedometer
+const ticks = document.querySelector('.ticks');
+const numOfTicks = 20;
+for (let i = 0; i <= numOfTicks; i++) {
+  const tick = document.createElement('div');
+  tick.classList.add('tick');
+  const angle = -90 + (180 / numOfTicks) * i;
+  console.log(angle);
+  tick.style.transform = `
+    translateX(-50%)
+    rotate(${angle}deg) 
+    translateY(-110px)
+    `;
+  ticks.appendChild(tick);
+}
+
+const needle = document.querySelector('.needle');
+
 // Initialize state based on URL parameter
 const params = new URLSearchParams(window.location.search);
 const state = params.get('state');
@@ -473,6 +491,8 @@ function animate() {
     updateCamera();
     endStarWarpEffect();
     movePlayer(delta);
+    const speedPercentage = Math.abs(speed / 20);
+    needle.style.transform = `rotate(${speedPercentage * 180 - 90}deg)`;
   }
   renderer.render(scene, camera);
   if (!transition) {
