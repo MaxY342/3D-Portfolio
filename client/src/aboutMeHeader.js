@@ -46,7 +46,7 @@ loader.load( 'src/assets/barbell/scene.gltf', function ( gltf ) {
 
   barbell.add(gltf.scene);
   barbell.scale.set(15, 15, 15);
-  barbell.position.set(30, 10, -5);
+  barbell.position.set(35, 10, -5);
   barbell.rotation.set(0, 0, 0);
   scene.add(barbell);
 }, undefined, function ( error ) {
@@ -61,7 +61,7 @@ loader.load( 'src/assets/graduation_cap/scene.gltf', function ( gltf ) {
 
   graduationCap.add(gltf.scene);
   graduationCap.scale.set(3, 3, 3);
-  graduationCap.position.set(0, 15, -5);
+  graduationCap.position.set(0, 21, -5);
   graduationCap.rotation.set(0, 0, 0);
   scene.add(graduationCap);
 }, undefined, function ( error ) {
@@ -76,7 +76,7 @@ loader.load( 'src/assets/book/scene.gltf', function ( gltf ) {
 
   book.add(gltf.scene);
   book.scale.set(4, 4, 4);
-  book.position.set(-40, 5, -5);
+  book.position.set(-40, 8, -5);
   book.rotation.set(0, 0, 0);
   scene.add(book);
 }, undefined, function ( error ) {

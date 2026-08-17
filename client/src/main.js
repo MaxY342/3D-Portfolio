@@ -424,11 +424,14 @@ backButton.addEventListener('click', () => {
 
 // Speedometer
 const ticks = document.querySelector('.ticks');
-const numOfTicks = 20;
-for (let i = 0; i <= numOfTicks; i++) {
+const needle = document.querySelector('.needle');
+const speedText = document.querySelector('.speed-text');
+const speedLabels = document.querySelector('.speed-labels');
+const numOfIncrements = 20;
+for (let i = 0; i <= numOfIncrements; i++) {
   const tick = document.createElement('div');
   tick.classList.add('tick');
-  const angle = -90 + (180 / numOfTicks) * i;
+  const angle = -90 + (180 / numOfIncrements) * i;
   console.log(angle);
   tick.style.transform = `
     translateX(-50%)
@@ -436,9 +439,21 @@ for (let i = 0; i <= numOfTicks; i++) {
     translateY(-110px)
     `;
   ticks.appendChild(tick);
+  if (i % 5 === 0) {
+    const label = document.createElement('div');
+    label.classList.add('tick-label');
+    label.textContent = i;
+    const x = 100 * Math.cos(THREE.MathUtils.degToRad(-90 + angle));
+    const y = 100 * Math.sin(THREE.MathUtils.degToRad(-90 + angle));
+    label.style.transform = `
+      translateX(-50%)
+      translateY(-50%)
+      translateX(${x}px)
+      translateY(${y}px)
+      `;
+    speedLabels.appendChild(label);
+  }
 }
-
-const needle = document.querySelector('.needle');
 
 // Initialize state based on URL parameter
 const params = new URLSearchParams(window.location.search);
@@ -493,6 +508,7 @@ function animate() {
     movePlayer(delta);
     const speedPercentage = Math.abs(speed / 20);
     needle.style.transform = `rotate(${speedPercentage * 180 - 90}deg)`;
+    speedText.textContent = `Speed: ${Math.round(speed)}`;
   }
   renderer.render(scene, camera);
   if (!transition) {
