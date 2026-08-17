@@ -428,31 +428,40 @@ const needle = document.querySelector('.needle');
 const speedText = document.querySelector('.speed-text');
 const speedLabels = document.querySelector('.speed-labels');
 const numOfIncrements = 20;
+
 for (let i = 0; i <= numOfIncrements; i++) {
   const tick = document.createElement('div');
   tick.classList.add('tick');
   const angle = -90 + (180 / numOfIncrements) * i;
-  console.log(angle);
-  tick.style.transform = `
-    translateX(-50%)
-    rotate(${angle}deg) 
-    translateY(-110px)
-    `;
-  ticks.appendChild(tick);
+
   if (i % 5 === 0) {
     const label = document.createElement('div');
     label.classList.add('tick-label');
     label.textContent = i;
-    const x = 100 * Math.cos(THREE.MathUtils.degToRad(-90 + angle));
-    const y = 100 * Math.sin(THREE.MathUtils.degToRad(-90 + angle));
+    const x = 90 * Math.cos(THREE.MathUtils.degToRad(-90 + angle));
+    const y = 90 * Math.sin(THREE.MathUtils.degToRad(-90 + angle));
     label.style.transform = `
       translateX(-50%)
       translateY(-50%)
       translateX(${x}px)
       translateY(${y}px)
       `;
+    tick.style.height = '24px';
+    tick.style.transform = `
+    translateX(-50%)
+    rotate(${angle}deg) 
+    translateY(-102px)
+    `;
     speedLabels.appendChild(label);
+  } else {
+    tick.style.transform = `
+    translateX(-50%)
+    rotate(${angle}deg) 
+    translateY(-110px)
+    `;
   }
+
+  ticks.appendChild(tick);
 }
 
 // Initialize state based on URL parameter
