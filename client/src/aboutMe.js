@@ -4,14 +4,14 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 // Initialize scene, camera, and renderer
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / (window.innerHeight / 1.3), 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({
-  canvas: document.querySelector('#title-canvas'),
+  canvas: document.querySelector('#about-bg'),
   antialias:true,
   alpha: true,
 });
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight / 1.3);
+renderer.setSize(window.innerWidth, window.innerHeight);
 camera.position.setZ(30);
 renderer.render(scene, camera);
 
@@ -30,8 +30,8 @@ loader.load( 'src/assets/laptop333/result.gltf', function ( gltf ) {
   gltf.scene.rotation.set(0.5, 0.5, 0); // Change starting rotation
 
   laptop.add(gltf.scene);
-  laptop.scale.set(0.03, 0.03, 0.03);
-  laptop.position.set(40, -15, -5);
+  laptop.scale.set(0.025, 0.025, 0.025);
+  laptop.position.set(35, -10, -10);
   laptop.rotation.set(180, 180, 0);
   scene.add(laptop);
 }, undefined, function ( error ) {
@@ -45,8 +45,8 @@ loader.load( 'src/assets/barbell/scene.gltf', function ( gltf ) {
   gltf.scene.rotation.set(0, 0, 0); // Change starting rotation
 
   barbell.add(gltf.scene);
-  barbell.scale.set(15, 15, 15);
-  barbell.position.set(35, 10, -5);
+  barbell.scale.set(14, 14, 14);
+  barbell.position.set(35, 15, -10);
   barbell.rotation.set(0, 0, 0);
   scene.add(barbell);
 }, undefined, function ( error ) {
@@ -61,7 +61,7 @@ loader.load( 'src/assets/graduation_cap/scene.gltf', function ( gltf ) {
 
   graduationCap.add(gltf.scene);
   graduationCap.scale.set(3, 3, 3);
-  graduationCap.position.set(0, 21, -5);
+  graduationCap.position.set(0, 23, -10);
   graduationCap.rotation.set(0, 0, 0);
   scene.add(graduationCap);
 }, undefined, function ( error ) {
@@ -76,7 +76,7 @@ loader.load( 'src/assets/book/scene.gltf', function ( gltf ) {
 
   book.add(gltf.scene);
   book.scale.set(4, 4, 4);
-  book.position.set(-40, 8, -5);
+  book.position.set(-37, 13, -10);
   book.rotation.set(0, 0, 0);
   scene.add(book);
 }, undefined, function ( error ) {
@@ -91,7 +91,7 @@ loader.load( 'src/assets/console/scene.gltf', function ( gltf ) {
 
   controller.add(gltf.scene);
   controller.scale.set(4, 4, 4);
-  controller.position.set(-40, -15, -5);
+  controller.position.set(-40, -10, -10);
   controller.rotation.set(0, 0, 0);
   scene.add(controller);
 }, undefined, function ( error ) {
@@ -121,6 +121,18 @@ function cursorEffect(object) {
   object.lookAt(targetPoint);
 }
 
+const backButton = document.getElementById('about-back-button');
+backButton.addEventListener('click', () => {
+    window.location.href = 'index.html?state=menu';
+});
+
+// Content side Canvas
+const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const cubeGeometry = new THREE.BoxGeometry(15, 15, 15);
+const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+scene.add(cube);
+cube.position.set(56, -80, -30);
+
 // Animation Loop
 function animate() {
   requestAnimationFrame(animate);
@@ -130,6 +142,9 @@ function animate() {
   cursorEffect(graduationCap);
   cursorEffect(book);
   cursorEffect(controller);
+  camera.position.y = -window.scrollY / 10; // Adjust the divisor for speed of movement
+  cube.rotation.x += 0.01;
+  cube.rotation.y += 0.01;
 }
 
 animate();
