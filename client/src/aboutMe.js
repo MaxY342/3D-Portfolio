@@ -127,7 +127,9 @@ backButton.addEventListener('click', () => {
 });
 
 // Content side Canvas
-const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const texture = new THREE.TextureLoader().load('src/assets/me.jpg');
+texture.colorSpace = THREE.SRGBColorSpace;
+const cubeMaterial = new THREE.MeshBasicMaterial({ map: texture });
 const cubeGeometry = new THREE.BoxGeometry(15, 15, 15);
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 scene.add(cube);
