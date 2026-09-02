@@ -2,6 +2,10 @@ import './styles/style.css';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { lerp } from 'three/src/math/MathUtils.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import panelVertexShader from './shaders/panelVertex.glsl';
+import panelFragmentShader from './shaders/panelFragment.glsl';
 
 // Initialize scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -30,14 +34,6 @@ pointLight.position.set(20, 20, 20);
 
 const ambientLight = new THREE.AmbientLight(0xffffff);
 scene.add(pointLight, ambientLight);
-
-// Test cube
-/*const cube = new THREE.Mesh(
-  new THREE.BoxGeometry(10, 10, 10),
-  new THREE.MeshStandardMaterial({ color: 0x00ff00 })
-);
-scene.add(cube);
-cube.position.set(0, 0, 0);*/
 
 // Laptop
 const loader = new GLTFLoader();
@@ -77,36 +73,100 @@ const radius = 15;
 const projects = [];
 const projectDetails = [];
 
-// Create project panels returns [videoElement, panelMesh]
-function createCarouselPanel(name) {
-  const video = document.getElementById(name);
+// Create project panels
+function createCarouselPanel(videoName, overlayText) {
+  const video = document.getElementById(videoName);
   const videoTexture = new THREE.VideoTexture(video);
   videoTexture.minFilter = THREE.LinearFilter;
   videoTexture.magFilter = THREE.LinearFilter;
   videoTexture.format = THREE.RGBFormat;
-  const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+  const rtA = new THREE.WebGLRenderTarget(1280, 720);
+
+  // Horizontal pass
+  const horizontalUniforms = {
+    diffuseTexture: { value: videoTexture },
+    direction: { value: new THREE.Vector2(1, 0) },
+    resolution: { value: new THREE.Vector2(1280, 720) },
+    blurSize: { value: 4.0 } // pixels
+  }
+  const horizontalVideoMaterial = new THREE.ShaderMaterial({ 
+    uniforms: horizontalUniforms, 
+    fragmentShader: panelFragmentShader, 
+    vertexShader: panelVertexShader,
+    transparent: true, 
+    side: THREE.DoubleSide 
+  });
+  const blurScene = new THREE.Scene();
+  const blurMesh = new THREE.Mesh(new THREE.PlaneGeometry(16, 9), horizontalVideoMaterial);
+  const blurCamera = new THREE.OrthographicCamera(-8, 8, 4.5, -4.5, -1, 1);
+  blurScene.add(blurMesh);
+
+  // Vertical pass
+  const verticalUniforms = {
+    diffuseTexture: { value: rtA.texture },
+    direction: { value: new THREE.Vector2(0, 1) },
+    resolution: { value: new THREE.Vector2(1280, 720) },
+    blurSize: { value: 4.0 } // pixels
+  };
+  const verticalVideoMaterial = new THREE.ShaderMaterial({ 
+    uniforms: verticalUniforms, 
+    fragmentShader: panelFragmentShader,
+    vertexShader: panelVertexShader,
+    transparent: true, 
+    side: THREE.DoubleSide 
+  });
+
   const videoGeometry = new THREE.PlaneGeometry(16, 9);
-  return [video, new THREE.Mesh(videoGeometry, videoMaterial)];
+  const mesh = new THREE.Mesh(videoGeometry, verticalVideoMaterial);
+  return {
+    video, 
+    mesh,
+    overlayText,
+
+    blurCamera,
+    blurScene,
+    rtA,
+
+    horizontalUniforms,
+    verticalUniforms
+  };
+}
+
+// Create text mesh
+function createText(text, fontSize, position, color) {
+  return new Promise((resolve, reject) => {
+    const fontLoader = new FontLoader();
+    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (font) => {
+      const textGeometry = new TextGeometry(text, {
+        font: font,
+        size: fontSize,
+        height: 0.5,
+        depth: 0.1,
+      });
+      const textMaterial = new THREE.MeshStandardMaterial({ color: color });
+      const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+      textMesh.position.copy(position);
+      textGeometry.center();
+      resolve(textMesh);
+    }, 
+    undefined,
+    reject
+    );
+  });
 }
 
 // Add project panel mesh and video to projects array
-const [audioVisualizerVideo, audioVisualizerPanelMesh] = createCarouselPanel('audio-visualizer-video');
-const [tictactoeVideo, tictactoePanelMesh] = createCarouselPanel('tictactoe-video');
-const [portfolioVideo, portfolioPanelMesh] = createCarouselPanel('portfolio-video');
-const [netflixReplicaVideo, netflixReplicaPanelMesh] = createCarouselPanel('netflix-replica-video');
-const [discordBotVideo, discordBotPanelMesh] = createCarouselPanel('discord-bot-video');
-projects.push({video: audioVisualizerVideo, mesh: audioVisualizerPanelMesh});
-projects.push({video: tictactoeVideo, mesh: tictactoePanelMesh});
-projects.push({video: portfolioVideo, mesh: portfolioPanelMesh});
-projects.push({video: netflixReplicaVideo, mesh: netflixReplicaPanelMesh});
-projects.push({video: discordBotVideo, mesh: discordBotPanelMesh});
+const videos = ['audio-visualizer-video', 'tictactoe-video', 'portfolio-video', 'netflix-replica-video', 'discord-bot-video'];
+const videoNames = ['Audio Visualizer', 'Tic Tac Toe', 'Portfolio', 'Netflix Replica', 'Discord Bot'];
+videos.forEach((videoName, index) => {
+  projects.push(createCarouselPanel(videoName, videoNames[index]));
+});
 
 // Add project details
-projectDetails.push(document.getElementById('audio-visualizer-details'));
-projectDetails.push(document.getElementById('tictactoe-details'));
-projectDetails.push(document.getElementById('portfolio-details'));
-projectDetails.push(document.getElementById('netflix-replica-details'));
-projectDetails.push(document.getElementById('discord-bot-details'));
+const details = ['audio-visualizer-details', 'tictactoe-details', 'portfolio-details', 'netflix-replica-details', 'discord-bot-details'];
+details.forEach(detailName => {
+  projectDetails.push(document.getElementById(detailName));
+});
 
 // Position panels in a circle
 for (let i = 0; i < projects.length; i++) {
@@ -118,10 +178,13 @@ for (let i = 0; i < projects.length; i++) {
 
   mesh.position.set(x, -40, z);
   mesh.rotation.y = angle;
+  const text = await createText(projects[i].overlayText, 1, mesh.position, 0xffffff);
+  text.rotation.y = angle;
+  group.add(text);
   group.add(mesh);
 }
 
-// Caurousel rotation
+// Carousel rotation
 let currentRotation = group.rotation.y;
 let targetRotation = 0;
 const step = (Math.PI * 2) / projects.length;
@@ -230,11 +293,6 @@ projectsBackButton.addEventListener('click', () => {
 // Camera movement on scroll
 function moveCamera() {
   const t = document.body.getBoundingClientRect().top;
-  /*cube.rotation.x += 0.05;
-  cube.rotation.y += 0.075;
-  cube.rotation.z += 0.05;*/
-  //group.rotation.y = t * 0.001;
-  //camera.position.y = t * 0.05;
   group.position.y = lerp(group.position.y, -t * 0.05 - 1, 0.8); // move carousel with scroll
   laptop.position.y = lerp(laptop.position.y, -t * 0.009 * -laptop.position.z -80, 0.8); // move laptop with scroll by factor of z pos
 }
@@ -245,6 +303,12 @@ moveCamera();
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
+  // Horizontal blur
+  for (let i = 0; i < projects.length; i++) {
+    renderer.setRenderTarget(projects[i].rtA);
+    renderer.render(projects[i].blurScene, projects[i].blurCamera);
+  }
+  renderer.setRenderTarget(null);
   moveCarousel();
   renderer.render(scene, camera);
 }

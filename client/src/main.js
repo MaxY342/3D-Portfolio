@@ -7,8 +7,8 @@ import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
-import vertexShader from './shaders/vertex.glsl';
-import fragmentShader from './shaders/fragment.glsl';
+import vertexShader from './shaders/thrusterVertex.glsl';
+import fragmentShader from './shaders/thrusterFragment.glsl';
 
 // Initialize states
 const GameState = {
