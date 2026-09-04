@@ -74,7 +74,7 @@ const projects = [];
 const projectDetails = [];
 
 // Create project panels
-function createCarouselPanel(videoName, overlayText) {
+async function createCarouselPanel(videoName, overlayText) {
   const video = document.getElementById(videoName);
   const videoTexture = new THREE.VideoTexture(video);
   videoTexture.minFilter = THREE.LinearFilter;
@@ -93,7 +93,7 @@ function createCarouselPanel(videoName, overlayText) {
     uniforms: horizontalUniforms, 
     fragmentShader: panelFragmentShader, 
     vertexShader: panelVertexShader,
-    transparent: true, 
+    transparent: true,
     side: THREE.DoubleSide 
   });
   const blurScene = new THREE.Scene();
@@ -112,16 +112,19 @@ function createCarouselPanel(videoName, overlayText) {
     uniforms: verticalUniforms, 
     fragmentShader: panelFragmentShader,
     vertexShader: panelVertexShader,
-    transparent: true, 
+    transparent: true,
     side: THREE.DoubleSide 
   });
 
   const videoGeometry = new THREE.PlaneGeometry(16, 9);
   const mesh = new THREE.Mesh(videoGeometry, verticalVideoMaterial);
+
+  // Text overlay
+  const overlayTextMesh = await createText(overlayText, 1, new THREE.Vector3(0, 0, 0), 0xffffff);
   return {
     video, 
     mesh,
-    overlayText,
+    overlayTextMesh,
 
     blurCamera,
     blurScene,
@@ -143,7 +146,7 @@ function createText(text, fontSize, position, color) {
         height: 0.5,
         depth: 0.1,
       });
-      const textMaterial = new THREE.MeshStandardMaterial({ color: color });
+      const textMaterial = new THREE.MeshStandardMaterial({ color: color, transparent: true, opacity: 1.0 });
       const textMesh = new THREE.Mesh(textGeometry, textMaterial);
       textMesh.position.copy(position);
       textGeometry.center();
@@ -158,8 +161,9 @@ function createText(text, fontSize, position, color) {
 // Add project panel mesh and video to projects array
 const videos = ['audio-visualizer-video', 'tictactoe-video', 'portfolio-video', 'netflix-replica-video', 'discord-bot-video'];
 const videoNames = ['Audio Visualizer', 'Tic Tac Toe', 'Portfolio', 'Netflix Replica', 'Discord Bot'];
-videos.forEach((videoName, index) => {
-  projects.push(createCarouselPanel(videoName, videoNames[index]));
+videos.forEach(async (videoName, index) => {
+  projects.push(await createCarouselPanel(videoName, videoNames[index]));
+  console.log(projects);
 });
 
 // Add project details
@@ -169,83 +173,88 @@ details.forEach(detailName => {
 });
 
 // Position panels in a circle
-for (let i = 0; i < projects.length; i++) {
-  const angle = i / 5 * Math.PI * 2;
-  const z = Math.cos(angle) * radius;
-  const x = Math.sin(angle) * radius;
+function positionPanels() {
+  projects.forEach((project, i) => {
+    const angle = i / 5 * Math.PI * 2;
+    const z = Math.cos(angle) * radius;
+    const x = Math.sin(angle) * radius;
 
-  const mesh = projects[i].mesh;
+    const mesh = project.mesh;
 
-  mesh.position.set(x, -40, z);
-  mesh.rotation.y = angle;
-  const text = await createText(projects[i].overlayText, 1, mesh.position, 0xffffff);
-  text.rotation.y = angle;
-  group.add(text);
-  group.add(mesh);
-}
-
-// Carousel rotation
-let currentRotation = group.rotation.y;
-let targetRotation = 0;
-const step = (Math.PI * 2) / projects.length;
-let carouselIndex = 0;
-
-window.addEventListener('keydown', (event) => {
-  if (event.key === 'ArrowLeft') {
-    targetRotation += step;
-    updateCarouselIndex(-1);
-  }
-  else if (event.key === 'ArrowRight') {
-    targetRotation -= step;
-    updateCarouselIndex(1);
-  }
-});
-
-document.getElementById('left-button').addEventListener('click', () => {
-  targetRotation += step;
-  updateCarouselIndex(-1);
-});
-document.getElementById('right-button').addEventListener('click', () => {
-  targetRotation -= step;
-  updateCarouselIndex(1);
-});
-
-function moveCarousel() {
-  group.rotation.y += (targetRotation - currentRotation) * 0.1;
-  currentRotation = group.rotation.y;
-  // Smooth focus effect
-  projects.forEach((p, i) => {
-    const isActive = i === carouselIndex;
-
-    // target values
-    const targetScale = isActive ? 1.2 : 1.0;
-    const targetOpacity = isActive ? 1.0 : 0.5;
-
-    // Play video if active, pause if not
-    if (isActive) {
-      projects[i].video.play();
-    } else {
-      projects[i].video.pause();
-    }
-
-    // Lerp scale
-    p.mesh.scale.x = THREE.MathUtils.lerp(p.mesh.scale.x, targetScale, 0.05);
-    p.mesh.scale.y = THREE.MathUtils.lerp(p.mesh.scale.y, targetScale, 0.05);
-    p.mesh.scale.z = THREE.MathUtils.lerp(p.mesh.scale.z, targetScale, 0.05);
-
-    // Lerp opacity
-    p.mesh.material.opacity = THREE.MathUtils.lerp(
-      p.mesh.material.opacity,
-      targetOpacity,
-      0.05
-    );
+    mesh.position.set(x, -40, z);
+    mesh.rotation.y = angle;
+    project.overlayTextMesh.position.set(mesh.position.x, mesh.position.y, mesh.position.z);
+    project.overlayTextMesh.rotation.y = mesh.rotation.y;
+    group.add(project.overlayTextMesh);
+    group.add(mesh);
   });
 }
 
-function updateCarouselIndex(direction) {
-  // Direction: 1 for right, -1 for left
-  carouselIndex = (carouselIndex + direction) % projects.length;
+// Carousel rotation
+let carouselRotation = 0;
+let rotationVelocity = 0;
+let scrollSensitivity = 0.00015;
+let drag = 0.92;
+let snapping = false;
+let scrolling = false;
+let targetRotation = 0;
+let scrollTimeout;
+let carouselIndex = 0;
+const targetPixels = (90 * window.innerHeight) / 100;
+document.addEventListener('wheel', (event) => {
+  if (window.scrollY > targetPixels) {
+    scrolling = true;
+    rotationVelocity += event.deltaY * scrollSensitivity;
+    clearTimeout(scrollTimeout);
+    snapping = false;
+    scrollTimeout = setTimeout(() => {
+      snapToNearestPanel();
+    }, 1000);
+  }
+});
+
+function snapToNearestPanel() {
+  const angleStep = (Math.PI * 2) / projects.length;
+  const closestIndex = Math.round(carouselRotation / angleStep);
+  carouselIndex = closestIndex % projects.length;
+  targetRotation = closestIndex * angleStep;
+  snapping = true;
+  scrolling = false;
 }
+
+function animateCarousel() {
+  requestAnimationFrame(animateCarousel);
+  rotationVelocity *= drag;
+  carouselRotation += rotationVelocity;
+  group.rotation.y = -carouselRotation;
+  projects.forEach((p, i) => {
+    const isActive = i === carouselIndex && !scrolling;
+    if (isActive) {
+      projects[i].video.play();
+      p.mesh.scale.lerp(new THREE.Vector3(2, 2, 2), 0.05);
+      p.mesh.material.opacity = THREE.MathUtils.lerp(p.mesh.material.opacity, 1.0, 0.05);
+      p.overlayTextMesh.material.opacity = THREE.MathUtils.lerp(p.overlayTextMesh.material.opacity, 0.0, 0.05);
+      p.horizontalUniforms.blurSize.value = THREE.MathUtils.lerp(p.horizontalUniforms.blurSize.value, 0.0, 0.05);
+      p.verticalUniforms.blurSize.value = THREE.MathUtils.lerp(p.verticalUniforms.blurSize.value, 0.0, 0.05);
+    } else if (!isActive || scrolling) {
+      projects[i].video.pause();
+      p.mesh.scale.lerp(new THREE.Vector3(1.0, 1.0, 1.0), 0.05);
+      p.mesh.material.opacity = THREE.MathUtils.lerp(p.mesh.material.opacity, 0.8, 0.05);
+      p.overlayTextMesh.material.opacity = THREE.MathUtils.lerp(p.overlayTextMesh.material.opacity, 1.0, 0.05);
+      p.horizontalUniforms.blurSize.value = THREE.MathUtils.lerp(p.horizontalUniforms.blurSize.value, 4.0, 0.05);
+      p.verticalUniforms.blurSize.value = THREE.MathUtils.lerp(p.verticalUniforms.blurSize.value, 4.0, 0.05);
+    }
+
+  })
+  if (snapping) {
+    carouselRotation = THREE.MathUtils.lerp(carouselRotation, targetRotation, 0.1);
+    if (Math.abs(carouselRotation - targetRotation) < 0.001) {
+      carouselRotation = targetRotation;
+      snapping = false;
+    }
+  }
+}
+animateCarousel();
 
 // Logic for clicking a project
 document.addEventListener('click', (event) => {
@@ -309,7 +318,9 @@ function animate() {
     renderer.render(projects[i].blurScene, projects[i].blurCamera);
   }
   renderer.setRenderTarget(null);
-  moveCarousel();
+  if (projects.length > 0) {
+    positionPanels();
+  }
   renderer.render(scene, camera);
 }
 animate();
